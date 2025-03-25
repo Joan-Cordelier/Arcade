@@ -74,8 +74,8 @@ jobs:
             - name: is library
               run: |
                 for library in ${{ vars.LIBRARIES }};do
-                 if [ ! -f "$library" ]; then
-                  echo "File $library does not exist"
+                 if [ ! -f "/lib/$library" ]; then
+                  echo "File /lib/$library does not exist"
                   exit 1
                 fi
                 done
