@@ -73,11 +73,11 @@ jobs:
                 done
             - name: is library
               run: |
-                for library in ${{ vars.LIBRARIES }};do
-                 if [ ! -f "/lib/$library" ]; then
-                  echo "File /lib/$library does not exist"
+                for library in ${{ vars.LIBRARIES }}; do
+                 if [ ! -f "./lib/$library" ]; then
+                  echo "File ./lib/$library does not exist"
                   exit 1
-                fi
+                 fi
                 done
             - name: make clean
               run: make clean
