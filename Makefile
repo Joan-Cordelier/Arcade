@@ -1,19 +1,9 @@
-## ----------------------------------------------------------------------------------- ##
-##                                                                                     ##
-## EPITECH PROJECT - Wed, Mar, 2025                                                    ##
-## Title           - Arcade                                                            ##
-## Description     -                                                                   ##
-##     Makefile                                                                        ##
-##                                                                                     ##
-## ----------------------------------------------------------------------------------- ##
-##                                                                                     ##
-##       _|_|_|_|  _|_|_|    _|_|_|  _|_|_|_|_|  _|_|_|_|    _|_|_|  _|    _|          ##
-##       _|        _|    _|    _|        _|      _|        _|        _|    _|          ##
-##       _|_|_|    _|_|_|      _|        _|      _|_|_|    _|        _|_|_|_|          ##
-##       _|        _|          _|        _|      _|        _|        _|    _|          ##
-##       _|_|_|_|  _|        _|_|_|      _|      _|_|_|_|    _|_|_|  _|    _|          ##
-##                                                                                     ##
-## ----------------------------------------------------------------------------------- ##
+##
+## EPITECH PROJECT, 2024
+## Arcade
+## File description:
+## Makefile
+##
 
 OBJ_DIR	=	obj
 LIB_DIR	=	lib
@@ -44,7 +34,8 @@ $(LIB_DIR):
 
 $(LIB_DIR)/arcade_%.so:
 	@echo "Compiling $@"
-	g++ $(LIBFLAGS) -Iinclude -o $@ $(wildcard $(filter %/$*, $(SUBDIRS_LIB))/*.cpp)
+	@filtered_src=$(wildcard $(filter %/$*, $(SUBDIRS_LIB))/*.cpp); \
+	g++ $(LIBFLAGS) -Iinclude -o $@ $$filtered_src
 
 #ARCADE
 $(NAME_ARCADE):	$(OBJS_ARCADE)
