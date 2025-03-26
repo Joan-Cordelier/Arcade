@@ -1,29 +1,25 @@
-/*
-** EPITECH PROJECT, 2025
-** B-OOP-400-TLS-4-1-arcade-melissa.muller
-** File description:
-** Menu
-*/
-
-#include "../IGame.hpp"
-
 #ifndef MENU_HPP_
 #define MENU_HPP_
 
+#include "../IGame.hpp"
+#include <vector>
+#include <string>
+
 class Menu : public IGame {
-    public:
-        Menu();
-        ~Menu() = default;
+public:
+    Menu();
+    ~Menu() override = default;
 
-        void Play() override;
-        void DoEvent(int event) override;
+    void reset() override;
+    void update(Event event) override;
+    std::vector<DisplayObject> getDisplayData() const override;
+    int getScore() const override;
 
-    protected:
-    private:
+private:
+    int selectedIndex;
+    std::vector<std::string> options;
 };
 
-extern "C" IGame* createGame() {
-    return new Menu();
-}
+extern "C" IGame* createGame();
 
-#endif /* !MENU_HPP_ */
+#endif

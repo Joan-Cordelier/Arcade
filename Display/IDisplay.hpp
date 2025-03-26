@@ -1,25 +1,26 @@
-/*
-** EPITECH PROJECT, 2025
-** B-OOP-400-TLS-4-1-arcade-melissa.muller
-** File description:
-** IDisplay
-*/
+#ifndef IDISPLAY_HPP_
+#define IDISPLAY_HPP_
 
-#ifndef IDisplay_HPP_
-#define IDisplay_HPP_
+#include "Event.hpp"
+#include "../include/DisplayObject.hpp"
+#include <string>
+#include <vector>
 
 class IDisplay {
-    public:
-        virtual ~IDisplay() = default;
+public:
+    virtual ~IDisplay() = default;
 
-        virtual int getEvent() = 0;
-        virtual void display() = 0;
+    virtual void init(int width, int height) = 0;
+    virtual void stop() = 0;
 
-        virtual void DisplayBackground() = 0;
-        
+    virtual Event pollEvent() = 0;
 
+    virtual void clear() = 0;
+    virtual void display(const std::vector<DisplayObject>& objects) = 0;
+
+    virtual void drawText(int x, int y, const std::string& text) = 0;
 };
 
-extern "C" IDisplay* create();
+extern "C" IDisplay* createDisplay();
 
-#endif /* !IDisplay_HPP_ */
+#endif

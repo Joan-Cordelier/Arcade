@@ -1,23 +1,23 @@
-/*
-** EPITECH PROJECT, 2025
-** B-OOP-400-TLS-4-1-arcade-melissa.muller
-** File description:
-** IGame
-*/
-
 #ifndef IGAME_HPP_
 #define IGAME_HPP_
 
-class IGame {
-    public:
-        virtual ~IGame() = default;
-        virtual void Play() = 0;
-        virtual void DoEvent(int event) = 0;
+#include "Event.hpp"
+#include "DisplayObject.hpp"
+#include <vector>
 
-    protected:
-    private:
+class IGame {
+public:
+    virtual ~IGame() = default;
+
+    virtual void reset() = 0;
+
+    virtual void update(Event event) = 0;
+
+    virtual std::vector<DisplayObject> getDisplayData() const = 0;
+
+    virtual int getScore() const = 0;
 };
 
 extern "C" IGame* createGame();
 
-#endif 
+#endif // IGAMEMODULE_HPP_
