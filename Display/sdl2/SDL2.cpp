@@ -28,7 +28,7 @@ void SDL2::init(int width, int height)
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderPresent(_renderer);
-    DL_ShowCursor(SDL_DISABLE);
+    SDL_ShowCursor(SDL_DISABLE);
     //_font = TTF_OpenFont("Font.ttf", 3); //en vérité je ne sais pas quelle font size il faut mettre donc c'est assez aléatoire
     //SDL_Color _textColor = {255, 255, 255};
     _running = true;
@@ -325,7 +325,6 @@ Event SDL2::pollEvent()
                         Key::Z,
                         {-1, -1, -1}
                     };
-                default: return Key::NONE;
             }
         }
     }

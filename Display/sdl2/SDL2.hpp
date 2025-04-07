@@ -6,6 +6,8 @@
 */
 
 #include <SDL2/SDL.h>
+#include <iostream>
+#include <ostream>
 //#include <SDL2/SDL_ttf.h>
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
