@@ -69,11 +69,10 @@ void Core::run()
             return;
         }
     }    
-    
-    display->init(800, 600); //TODO: change it to xhat we want
-    
+
+    display->init(800, 600);
     isRunning = true;
-    
+
     while (isRunning) {
         Event event = display->pollEvent();
 
@@ -81,41 +80,32 @@ void Core::run()
             isRunning = false;
             continue;
         }
-        if (menuManager->isInMenu()) {
-            menuManager->handleMenuInput(event);
-        } else if (game != nullptr) {
+
+        // Update le jeu courant (menu ou autre)
+        if (game != nullptr)
             game->update(event);
-        }
 
         update();
     }
+
     exitGame();
 }
 
+
 void Core::update()
 {
-    if (display == nullptr) {
+    if (display == nullptr || game == nullptr)
         return;
-    }
-    
-    display->clear();
-    
-    if (menuManager->isInMenu()) {
-        menuManager->renderMenu(
-            display,
-            libraryManager->getDisplayLibs(),
-            libraryManager->getGameLibs(),
-            libraryManager->getCurrentDisplayIndex(),
-            libraryManager->getCurrentGameIndex()
-        );
-    } else if (game != nullptr) {
-        const auto& gameObjects = game->getDisplayData();
 
-        display->display(gameObjects);
-    }
-    
+    display->clear();
+
+    // Affiche les objets du jeu courant (menu ou jeu)
+    const auto& objects = game->getDisplayData();
+    display->display(objects);
+
     display->display({});
 }
+
 
 void Core::nextDisplay()
 {
