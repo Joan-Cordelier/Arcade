@@ -6,6 +6,7 @@
 */
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
 #include "../include/Event.hpp"
@@ -21,14 +22,21 @@ class SDL2 : public IDisplay {
 
         void init(int width, int height) override;
         void stop() override;
-        
+
         Event pollEvent() override;
-        
+
         void clear() override;
         void display(const std::vector<DisplayObject>& objects) override;
     private:
+    SDL_Window *_window;
+    SDL_Renderer *_renderer;
+    TTF_Font* _font;
+    SDL_Color _textColor;
 };
 
-extern "C" IDisplay *createDisplay();
+extern "C" IDisplay* create()
+{
+    return new SDL2();
+}
 
 #endif /* !SDL2_HPP_ */
