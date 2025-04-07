@@ -28,20 +28,29 @@ Event SfmlDisplay::pollEvent() {
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
-            return Event::EXIT;
+            return {
+                EventType::EXIT,
+                Key::NONE,
+                {-1, -1, -1}
+            };
         if (event.type == sf::Event::KeyPressed) {
             switch (event.key.code) {
-                case sf::Keyboard::Up: return Event::UP;
-                case sf::Keyboard::Down: return Event::DOWN;
-                case sf::Keyboard::Left: return Event::LEFT;
-                case sf::Keyboard::Right: return Event::RIGHT;
-                case sf::Keyboard::Enter: return Event::VALIDATE;
-                case sf::Keyboard::Escape: return Event::EXIT;
+                case sf::Keyboard::Up: return {EventType::KEY_PRESSED, Key::UP, {-1, -1, -1}};
+                case sf::Keyboard::Down: return {EventType::KEY_PRESSED, Key::DOWN, {-1, -1, -1}};
+                case sf::Keyboard::Left: return {EventType::KEY_PRESSED, Key::LEFT, {-1, -1, -1}};
+                case sf::Keyboard::Right: return {EventType::KEY_PRESSED, Key::RIGHT, {-1, -1, -1}};
+                case sf::Keyboard::Space: return {EventType::KEY_PRESSED, Key::SPACE, {-1, -1, -1}};
+                case sf::Keyboard::Enter: return {EventType::KEY_PRESSED, Key::ENTER, {-1, -1, -1}};
+                case sf::Keyboard::Escape: return {EventType::KEY_PRESSED, Key::ESCAPE, {-1, -1, -1}};
                 default: break;
             }
         }
     }
-    return Event::NONE;
+    return {
+        EventType::NONE,
+        Key::NONE,
+        {-1, -1, -1}
+    };
 }
 
 void SfmlDisplay::clear() {
@@ -55,48 +64,36 @@ void SfmlDisplay::display(const std::vector<DisplayObject>& objects) {
 }
 
 void SfmlDisplay::drawObject(const DisplayObject& obj) {
-    if (!obj.isVisible)
-        return;
 
-    sf::Vector2f pos(obj.x * 32.0f, obj.y * 32.0f);
+    sf::Vector2f pos(obj.getX() * 32.0f, obj.getY() * 32.0f);
 
     // Cas texte
-    if (obj.type == TileType::TEXT || !obj.content.empty()) {
+    if (obj.getType() == ObjectType::TEXT && !obj.getText().empty()) {
         sf::Text text;
         text.setFont(font);
-        text.setString(obj.content);
+        text.setString(obj.getText());
         text.setCharacterSize(20);
-        text.setFillColor(sf::Color(obj.color.colorR, obj.color.colorG, obj.color.colorB, obj.color.alpha));
+        text.setFillColor(sf::Color(obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a));
         text.setPosition(pos);
         window.draw(text);
         return;
     }
 
     // Sprite
-    if (!obj.spritePath.empty()) {
+    if (obj.getType() == ObjectType::SPRITE && !obj.getTexturePath().empty()) {
         sf::Sprite sprite;
-        sprite.setTexture(loadTexture(obj.spritePath));
-        sprite.setScale(obj.scaleX, obj.scaleY);
+        sprite.setTexture(loadTexture(obj.getTexturePath()));
+        sprite.setScale(obj.getScaleX(), obj.getScaleY());
         sprite.setPosition(pos);
         window.draw(sprite);
         return;
     }
 
     // Rectangle de couleur
-    sf::RectangleShape shape(sf::Vector2f(32.0f * obj.scaleX, 32.0f * obj.scaleY));
-    shape.setFillColor(sf::Color(obj.color.colorR, obj.color.colorG, obj.color.colorB, obj.color.alpha));
+    sf::RectangleShape shape(sf::Vector2f(32.0f * obj.getScaleX(), 32.0f * obj.getScaleY()));
+    shape.setFillColor(sf::Color(obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a));
     shape.setPosition(pos);
     window.draw(shape);
-}
-
-void SfmlDisplay::drawText(int x, int y, const std::string& text) {
-    sf::Text t;
-    t.setFont(font);
-    t.setString(text);
-    t.setCharacterSize(20);
-    t.setFillColor(sf::Color::White);
-    t.setPosition(x * 32, y * 32);
-    window.draw(t);
 }
 
 sf::Texture& SfmlDisplay::loadTexture(const std::string& path) {
@@ -108,13 +105,4 @@ sf::Texture& SfmlDisplay::loadTexture(const std::string& path) {
         textureCache[path] = texture;
     }
     return textureCache[path];
-}
-
-std::string SfmlDisplay::get_typeLib() 
-{
-    return "Garph";
-}
-
-extern "C" IDisplay* createDisplay() {
-    return new SfmlDisplay();
 }

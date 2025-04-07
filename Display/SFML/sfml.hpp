@@ -16,9 +16,6 @@ public:
     Event pollEvent() override;
     void clear() override;
     void display(const std::vector<DisplayObject>& objects) override;
-    void drawText(int x, int y, const std::string& text) override;
-    std::string get_typeLib() override;
-
 private:
     sf::RenderWindow window;
     sf::Font font;
@@ -28,4 +25,6 @@ private:
     sf::Texture& loadTexture(const std::string& path);
 };
 
-extern "C" IDisplay* createDisplay();
+extern "C" IDisplay* createDisplay() {
+    return new SfmlDisplay();
+}
