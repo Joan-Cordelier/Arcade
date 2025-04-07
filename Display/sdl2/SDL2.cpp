@@ -170,182 +170,156 @@ Event SDL2::pollEvent()
                         {-1, -1, -1}
                     };
                 case SDLK_a:
-                case SDLK_A:
                     return {
                         EventType::KEY_PRESSED,
                         Key::A,
                         {-1, -1, -1}
                     };
                 case SDLK_b:
-                case SDLK_B:
                     return {
                         EventType::KEY_PRESSED,
                         Key::B,
                         {-1, -1, -1}
                     };
                 case SDLK_c:
-                case SDLK_C:
                     return {
                         EventType::KEY_PRESSED,
                         Key::C,
                         {-1, -1, -1}
                     };
                 case SDLK_d:
-                case SDLK_D:
                     return {
                         EventType::KEY_PRESSED,
                         Key::D,
                         {-1, -1, -1}
                     };
                 case SDLK_e:
-                case SDLK_E:
                     return {
                         EventType::KEY_PRESSED,
                         Key::E,
                         {-1, -1, -1}
                     };
                 case SDLK_f:
-                case SDLK_F:
                     return {
                         EventType::KEY_PRESSED,
                         Key::F,
                         {-1, -1, -1}
                     };
                 case SDLK_g:
-                case SDLK_G:
                     return {
                         EventType::KEY_PRESSED,
                         Key::G,
                         {-1, -1, -1}
                     };
                 case SDLK_h:
-                case SDLK_H:
                     return {
                         EventType::KEY_PRESSED,
                         Key::H,
                         {-1, -1, -1}
                     };
                 case SDLK_i:
-                case SDLK_I:
                     return {
                         EventType::KEY_PRESSED,
                         Key::I,
                         {-1, -1, -1}
                     };
                 case SDLK_j:
-                case SDLK_J:
                     return {
                         EventType::KEY_PRESSED,
                         Key::J,
                         {-1, -1, -1}
                     };
                 case SDLK_k:
-                case SDLK_K:
                     return {
                         EventType::KEY_PRESSED,
                         Key::K,
                         {-1, -1, -1}
                     };
                 case SDLK_l:
-                case SDLK_L:
                     return {
                         EventType::KEY_PRESSED,
                         Key::L,
                         {-1, -1, -1}
                     };
                 case SDLK_m:
-                case SDLK_M:
                     return {
                         EventType::KEY_PRESSED,
                         Key::M,
                         {-1, -1, -1}
                     };
                 case SDLK_n:
-                case SDLK_N:
                     return {
                         EventType::KEY_PRESSED,
                         Key::N,
                         {-1, -1, -1}
                     };
                 case SDLK_o:
-                case SDLK_O:
                     return {
                         EventType::KEY_PRESSED,
                         Key::O,
                         {-1, -1, -1}
                     };
                 case SDLK_p:
-                case SDLK_P:
                     return {
                         EventType::KEY_PRESSED,
                         Key::P,
                         {-1, -1, -1}
                     };
                 case SDLK_q:
-                case SDLK_Q:
                     return {
                         EventType::KEY_PRESSED,
                         Key::Q,
                         {-1, -1, -1}
                     };
                 case SDLK_r:
-                case SDLK_R:
                     return {
                         EventType::KEY_PRESSED,
                         Key::R,
                         {-1, -1, -1}
                     };
                 case SDLK_s:
-                case SDLK_S:
                     return {
                         EventType::KEY_PRESSED,
                         Key::S,
                         {-1, -1, -1}
                     };
                 case SDLK_t:
-                case SDLK_T:
                     return {
                         EventType::KEY_PRESSED,
                         Key::T,
                         {-1, -1, -1}
                     };
                 case SDLK_u:
-                case SDLK_U:
                     return {
                         EventType::KEY_PRESSED,
                         Key::U,
                         {-1, -1, -1}
                     };
                 case SDLK_v:
-                case SDLK_V:
                     return {
                         EventType::KEY_PRESSED,
                         Key::V,
                         {-1, -1, -1}
                     };
                 case SDLK_w:
-                case SDLK_W:
                     return {
                         EventType::KEY_PRESSED,
                         Key::W,
                         {-1, -1, -1}
                     };
                 case SDLK_x:
-                case SDLK_X:
                     return {
                         EventType::KEY_PRESSED,
                         Key::X,
                         {-1, -1, -1}
                     };
                 case SDLK_y:
-                case SDLK_Y:
                     return {
                         EventType::KEY_PRESSED,
                         Key::Y,
                         {-1, -1, -1}
                     };
                 case SDLK_z:
-                case SDLK_Z:
                     return {
                         EventType::KEY_PRESSED,
                         Key::Z,
