@@ -5,69 +5,96 @@
 ## Makefile
 ##
 
-OBJ_DIR	=	obj
-LIB_DIR	=	lib
+# Directory structure
+OBJ_DIR = obj
+LIB_DIR = lib
 
-#ARCADE
+# Core program
+NAME_ARCADE = arcade
+DIR_CORE = Core
+
+# Compiler flags
 CXXFLAGS = -Wall -Wextra -Werror -std=c++17 -Iinclude
+LIBFLAGS = -Wall -Wextra -fPIC -shared -std=c++17 -Iinclude
 
-NAME_ARCADE	=	arcade
-#LIB
-LIBFLAGS = -Wall -Wextra -fPIC -shared -std=c++17
+# Core source files and objects
+SRCS_CORE = $(shell find $(DIR_CORE) -name "*.cpp")
+OBJS_CORE = $(SRCS_CORE:%.cpp=$(OBJ_DIR)/%.o)
 
-DIR_ARCADE	=	Core
-# Find all .cpp files in Core and its subdirectories
-SRCS_ARCADE	=	$(shell find $(DIR_ARCADE) -name "*.cpp")
-OBJS_ARCADE	=	$(SRCS_ARCADE:%.cpp=$(OBJ_DIR)/%.o)
+# Display libraries
+DISPLAY_LIBS = ncurses sfml sdl2
+DISPLAY_TARGETS = $(addprefix $(LIB_DIR)/arcade_, \
+	$(addsuffix .so, $(DISPLAY_LIBS)))
 
-SUBDIRS_DISPLAY = Display/ncurses
-SUBDIRS_GAMES = Games/
+# Game libraries
+GAME_LIBS = menu
+GAME_TARGETS = $(addprefix $(LIB_DIR)/arcade_, $(addsuffix .so, $(GAME_LIBS)))
 
-SUBDIRS_LIB	=	$(SUBDIRS_DISPLAY) $(SUBDIRS_GAMES)
+# Define phony targets
+.PHONY: all core games graphicals clean fclean re prepare
 
-LIBS_DISPLAY = $(patsubst %, $(LIB_DIR)/arcade_%.so, $(notdir $(SUBDIRS_DISPLAY)))
-LIBS_GAMES = $(patsubst %, $(LIB_DIR)/arcade_%.so, $(notdir $(SUBDIRS_GAMES)))
-LIBS = $(LIBS_DISPLAY) $(LIBS_GAMES)
+# Main rule - builds everything
+all: core games graphicals
 
+# Create necessary directories
+prepare:
+	@mkdir -p $(OBJ_DIR)/$(DIR_CORE)
+	@mkdir -p $(LIB_DIR)
+	@for lib in $(DISPLAY_LIBS); do \
+		mkdir -p $(OBJ_DIR)/Display/$$lib; \
+	done
+	@for game in $(GAME_LIBS); do \
+		mkdir -p $(OBJ_DIR)/Games/$$game; \
+	done
 
-all: $(LIB_DIR) core games graphicals
+# Core program compilation
+core: prepare $(NAME_ARCADE)
 
-$(LIB_DIR):
-	mkdir -p $@
+$(NAME_ARCADE): $(OBJS_CORE)
+	@echo "Building core arcade program: $@"
+	@g++ $(CXXFLAGS) -o $@ $^ -ldl
 
-$(LIB_DIR)/arcade_%.so:
-	@echo "Compiling $@"
-	@filtered_src=$(wildcard $(filter %/$*, $(SUBDIRS_LIB))/*.cpp); \
-	if [ "$*" = "ncurses" ]; then \
-		g++ $(LIBFLAGS) -Iinclude -o $@ $$filtered_src -lncurses; \
-	else \
-		g++ $(LIBFLAGS) -Iinclude -o $@ $$filtered_src; \
-	fi
+# Games libraries compilation
+games: prepare $(GAME_TARGETS)
 
-# Core rule - builds only the core program
-core: $(NAME_ARCADE)
+# Display libraries compilation
+graphicals: prepare $(DISPLAY_TARGETS)
 
-# Games rule - builds only the game libraries
-games: $(LIB_DIR) $(LIBS_GAMES)
+# Rules for building libraries
+$(LIB_DIR)/arcade_ncurses.so:
+	@echo "Building Dncurses library: $@"
+	@g++ $(LIBFLAGS) -o $@ $(shell find Display/ncurses \
+		-name "*.cpp" 2>/dev/null) -lncurses
 
-# Graphicals rule - builds only the graphical libraries
-graphicals: $(LIB_DIR) $(LIBS_DISPLAY)
+$(LIB_DIR)/arcade_sfml.so:
+	@echo "Building SFML library: $@"
+	@g++ $(LIBFLAGS) -o $@ $(shell find Display/sfml \
+		-name "*.cpp" 2>/dev/null) -lsfml-graphics \
+		-lsfml-window -lsfml-system
 
-#ARCADE
-$(NAME_ARCADE):	$(OBJS_ARCADE)
-	g++ $(CXXFLAGS) -o $@ $^
+$(LIB_DIR)/arcade_sdl2.so:
+	@echo "Building SDL2 library: $@"
+	@g++ $(LIBFLAGS) -o $@ $(shell find Display/sdl2 \
+		-name "*.cpp" 2>/dev/null) -lSDL2
 
-# Updated object file rule to handle subdirectories in Core
+$(LIB_DIR)/arcade_menu.so:
+	@echo "Building Gmenu library: $@"
+	@g++ $(LIBFLAGS) -o $@ $(shell find Games/Gmenu \
+		-name "*.cpp" 2>/dev/null) -ldl
+
+# Object files compilation
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	g++ $(CXXFLAGS) -c $< -o $@
+	@echo "Compiling: $<"
+	@g++ $(CXXFLAGS) -c $< -o $@
 
+# Clean rules
 clean:
+	@echo "Cleaning object files and libraries"
 	@rm -rf $(OBJ_DIR) $(LIB_DIR)
 
 fclean: clean
-	@rm -f $(OBJS_ARCADE) $(NAME_ARCADE)
+	@echo "Cleaning executable"
+	@rm -f $(NAME_ARCADE)
 
 re: fclean all
-
-.PHONY: all clean fclean re core games graphicals
