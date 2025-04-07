@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** Arcade
+** File description:
+** sfml.cpp
+*/
+
 #include "sfml.hpp"
 #include <iostream>
 
