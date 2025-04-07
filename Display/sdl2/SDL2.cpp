@@ -29,8 +29,8 @@ void SDL2::init(int width, int height)
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderPresent(_renderer);
     DL_ShowCursor(SDL_DISABLE);
-    _font = TTF_OpenFont("Font.ttf", 3); //en vérité je ne sais pas quelle font size il faut mettre donc c'est assez aléatoire
-    SDL_Color _textColor = {255, 255, 255};
+    //_font = TTF_OpenFont("Font.ttf", 3); //en vérité je ne sais pas quelle font size il faut mettre donc c'est assez aléatoire
+    //SDL_Color _textColor = {255, 255, 255};
     _running = true;
 }
 
@@ -372,7 +372,7 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
         switch (obj.getType()) {
             case ObjectType::RECTANGLE:
                 SDL_Rect rect = { obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight() };
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_RenderFillRect(_renderer, &rect);
                 break;
             case ObjectType::TEXT:
                 std::cout << "Affichage du texte: " << obj.getText() << std::endl;
@@ -392,12 +392,12 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
                         int dx = j - offsetX;
                         int dy = i - offsetY;
                         if (dx * dx + dy * dy <= offsetX * offsetX) {
-                            SDL_RenderDrawPoint(renderer, obj.getX() + j, obj.getY() + i);
+                            SDL_RenderDrawPoint(_renderer, obj.getX() + j, obj.getY() + i);
                         }
                     }
                 }
                 break;
         }
     }
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(_renderer);
 }
