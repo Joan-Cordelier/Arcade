@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 #include "../IGame.hpp"
+#include "../include/DisplayObject.hpp"
+#include "../include/Event.hpp"
 
 class Menu : public IGame {
     public:
