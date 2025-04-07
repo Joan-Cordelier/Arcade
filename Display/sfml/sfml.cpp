@@ -113,3 +113,7 @@ sf::Texture& SfmlDisplay::loadTexture(const std::string& path) {
     }
     return textureCache[path];
 }
+
+extern "C" IDisplay* createDisplay() {
+    return new SfmlDisplay();
+}

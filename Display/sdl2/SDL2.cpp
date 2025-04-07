@@ -35,3 +35,7 @@ void SDL2::clear()
 void SDL2::display(const std::vector<DisplayObject>& objects) 
 {
 }
+
+extern "C" IDisplay* create() {
+    return new SDL2();
+}

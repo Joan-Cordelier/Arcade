@@ -20,7 +20,7 @@ class IGame {
     
         virtual void update(Event event) = 0;
     
-        virtual std::vector<DisplayObject> getDisplayData() const = 0;
+        virtual const std::vector<DisplayObject> getDisplayData() const = 0;
     
         virtual int getScore() const = 0;
 

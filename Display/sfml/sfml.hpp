@@ -32,6 +32,4 @@ class SfmlDisplay : public IDisplay {
         sf::Texture& loadTexture(const std::string& path);
 };
 
-extern "C" IDisplay* createDisplay() {
-    return new SfmlDisplay();
-}
+extern "C" IDisplay *createDisplay();

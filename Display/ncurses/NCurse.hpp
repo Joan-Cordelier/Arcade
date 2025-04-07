@@ -34,8 +34,6 @@ class NcurseDisplayer : public IDisplay {
         int createColorPair(const Color& color);
 };
 
-extern "C" IDisplay* createDisplay() {
-    return new NcurseDisplayer();
-}
+extern "C" IDisplay *createDisplay();
 
 #endif /* !NcurseDisplayer_HPP_ */

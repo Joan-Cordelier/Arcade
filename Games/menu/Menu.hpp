@@ -22,7 +22,7 @@ class Menu : public IGame {
         void reset() override;
         void update(Event event) override;
 
-        std::vector<DisplayObject> getDisplayData() const override;
+        const std::vector<DisplayObject> getDisplayData() const override;
 
         int getScore() const override;
         void stop() override;

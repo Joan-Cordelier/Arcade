@@ -27,8 +27,6 @@ class SDL2 : public IDisplay {
     private:
 };
 
-extern "C" IDisplay* create() {
-    return new SDL2();
-}
+extern "C" IDisplay *createDisplay();
 
 #endif /* !SDL2_HPP_ */

@@ -414,3 +414,7 @@ void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
     }
     refresh();
 }
+
+extern "C" IDisplay* createDisplay() {
+    return new NcurseDisplayer();
+}

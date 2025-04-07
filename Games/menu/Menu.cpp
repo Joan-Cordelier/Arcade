@@ -34,7 +34,7 @@ void Menu::update(Event event)
 {
 }
 
-std::vector<DisplayObject> Menu::getDisplayData() const
+const std::vector<DisplayObject> Menu::getDisplayData() const
 {
     std::vector<DisplayObject> displayData;
     return displayData;
