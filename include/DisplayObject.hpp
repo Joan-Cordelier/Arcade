@@ -40,36 +40,42 @@ class DisplayObject {
             Color color = Color(),
             const std::string& text = "",
             const std::string& texturePath = ""
-        ) : x(x), y(y), width(width), height(height), 
-            type(type), color(color), text(text), texturePath(texturePath) {}
+        ) : _x(x), _y(y), _width(width), _height(height), 
+            _type(type), _color(color), _text(text), _texturePath(texturePath) {}
     
-        int getX() const { return x; }
-        int getY() const { return y; }
-        int getWidth() const { return width; }
-        int getHeight() const { return height; }
-        ObjectType getType() const { return type; }
-        Color getColor() const { return color; }
-        const std::string& getText() const { return text; }
-        const std::string& getTexturePath() const { return texturePath; }
+        int getX() const { return _x; }
+        int getY() const { return _y; }
+        int getWidth() const { return _width; }
+        int getHeight() const { return _height; }
+        int getScaleX() const { return _scaleX; }
+        int getScaleY() const { return _scaleY; }
+        ObjectType getType() const { return _type; }
+        Color getColor() const { return _color; }
+        const std::string& getText() const { return _text; }
+        const std::string& getTexturePath() const { return _texturePath; }
     
-        void setX(int newX) { x = newX; }
-        void setY(int newY) { y = newY; }
-        void setWidth(int newWidth) { width = newWidth; }
-        void setHeight(int newHeight) { height = newHeight; }
-        void setType(ObjectType newType) { type = newType; }
-        void setColor(const Color& newColor) { color = newColor; }
-        void setText(const std::string& newText) { text = newText; }
-        void setTexturePath(const std::string& newPath) { texturePath = newPath; }
+        void setX(int newX) { _x = newX; }
+        void setY(int newY) { _y = newY; }
+        void setWidth(int newWidth) { _width = newWidth; }
+        void setHeight(int newHeight) { _height = newHeight; }
+        void setScaleX(int newScaleX) { _scaleX = newScaleX; }
+        void setScaleY(int newScaleY) { _scaleY = newScaleY; }
+        void setType(ObjectType newType) { _type = newType; }
+        void setColor(const Color& newColor) { _color = newColor; }
+        void setText(const std::string& newText) { _text = newText; }
+        void setTexturePath(const std::string& newPath) { _texturePath = newPath; }
     
     private:
-        int x;
-        int y;
-        int width;
-        int height;
-        ObjectType type;
-        Color color;
-        std::string text;
-        std::string texturePath;
+        int _x;
+        int _y;
+        int _width;
+        int _height;
+        int _scaleX;
+        int _scaleY;
+        ObjectType _type;
+        Color _color;
+        std::string _text;
+        std::string _texturePath;
 };
 
 #endif /* !DISPLAYOBJECT_HPP_ */
