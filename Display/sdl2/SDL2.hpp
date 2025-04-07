@@ -6,7 +6,7 @@
 */
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+//#include <SDL2/SDL_ttf.h>
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
 #include "../include/Event.hpp"
@@ -30,8 +30,9 @@ class SDL2 : public IDisplay {
     private:
     SDL_Window *_window;
     SDL_Renderer *_renderer;
-    TTF_Font* _font;
-    SDL_Color _textColor;
+    bool _running;
+    //TTF_Font* _font;
+    //SDL_Color _textColor;
 };
 
 extern "C" IDisplay* create()
