@@ -5,6 +5,7 @@
 ** NCurse.cpp
 */
 
+#include <iostream>
 #include "NCurse.hpp"
 
 NcurseDisplayer::NcurseDisplayer()
@@ -19,11 +20,32 @@ NcurseDisplayer::~NcurseDisplayer()
 void NcurseDisplayer::init(int width, int height)
 {
     initscr();
-    cbreak();
+    raw();
     noecho();
     keypad(stdscr, TRUE);
-    curs_set(0);
+    curs_set(0);  // TODO: maybe add a cursor for certain modes
     start_color();
+    
+    if (!has_colors()) {
+        endwin();
+        std::cerr << "Terminal does not support colors" << std::endl;
+        return;
+    }
+    
+    // Use screen size rather than passed dimensions for better compatibility
+    _width = COLS;
+    _height = LINES;
+    
+    // Create a window that fills the entire screen
+    _window = newwin(_height, _width, 0, 0);
+    if (!_window) {
+        endwin();
+        std::cerr << "Failed to create ncurses window" << std::endl;
+        return;
+    }
+    
+    keypad(_window, TRUE);
+    
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -31,18 +53,39 @@ void NcurseDisplayer::init(int width, int height)
     init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(6, COLOR_CYAN, COLOR_BLACK);
     init_pair(7, COLOR_WHITE, COLOR_BLACK);
+    
+    nodelay(_window, TRUE);
+    
+    box(_window, 0, 0);
+    wrefresh(_window);
+    
     _running = true;
 }
 
 void NcurseDisplayer::stop()
 {
     _running = false;
+    if (_window) {
+        delwin(_window);
+        _window = nullptr;
+    }
     endwin();
 }
 
 Event NcurseDisplayer::pollEvent()
 {
+    nodelay(stdscr, TRUE);
     int key = getch();
+    nodelay(stdscr, FALSE);
+    
+    if (key == ERR) {
+        return {
+            EventType::NONE,
+            Key::NONE,
+            {-1, -1, -1}
+        };
+    }
+    
     switch (key) {
         case KEY_UP:
             return {
@@ -353,66 +396,108 @@ Event NcurseDisplayer::pollEvent()
 
 void NcurseDisplayer::clear()
 {
-    ::clear();
+    if (_window) {
+        // Use werase instead of wclear to avoid blinking
+        werase(_window);
+        box(_window, 0, 0); // Redraw border
+        // Don't refresh here, let display() handle it
+    }
 }
 
 int NcurseDisplayer::createColorPair(const Color& color)
 {
-    short colorIndex = _colorPairCount + 8;
+    for (size_t i = 0; i < _colors.size(); ++i) {
+        if (_colors[i].r == color.r &&
+            _colors[i].g == color.g &&
+            _colors[i].b == color.b) {
+            return static_cast<int>(i + 1);
+        }
+    }
 
+    if (_colors.size() >= 64) {
+        return (static_cast<int>(_colors.size()) % 64) + 1;
+    }
+
+    int newPair = static_cast<int>(_colors.size()) + 1;
+    short colorIndex = newPair + 7;
+    
     int r = color.r * 1000 / 255;
     int g = color.g * 1000 / 255;
     int b = color.b * 1000 / 255;
 
     init_color(colorIndex, r, g, b);
-
-    init_pair(_colorPairCount + 1, colorIndex, COLOR_BLACK);
-    _colorPairCount++;
+    init_pair(newPair, colorIndex, COLOR_BLACK);
     
-    return _colorPairCount;
+    _colors.push_back(color);
+
+    return newPair;
 }
 
 void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
 {
-    for (const auto& obj : objects) {
-        int colorPair = createColorPair(obj.getColor());
-        if (obj.getType() == ObjectType::RECTANGLE) {
-            attron(COLOR_PAIR(static_cast<short>(colorPair)));
-            for (int i = 0; i < obj.getHeight(); ++i) {
-                mvhline(obj.getY() + i, obj.getX(), ' ', obj.getWidth());
-            }
-            attroff(COLOR_PAIR(static_cast<short>(colorPair)));
-        } else if (obj.getType() == ObjectType::TEXT) {
-            attron(COLOR_PAIR(static_cast<short>(colorPair)));
-            mvprintw(obj.getY(), obj.getX(), "%s", obj.getText().c_str());
-            attroff(COLOR_PAIR(static_cast<short>(colorPair)));
-        }
-        else if (obj.getType() == ObjectType::SPRITE) {
-            //TODO: Handle sprite drawing
-            attron(COLOR_PAIR(static_cast<short>(colorPair)));
-            for (int i = 0; i < obj.getHeight(); ++i) {
-                mvhline(obj.getY() + i, obj.getX(), ' ', obj.getWidth());
-            }
-            attroff(COLOR_PAIR(static_cast<short>(colorPair)));
-        }
-        else if (obj.getType() == ObjectType::CUSTOM) {
-            //TODO: Handle custom drawing
-            attron(COLOR_PAIR(static_cast<short>(colorPair)));
-            for (int i = 0; i < obj.getHeight(); ++i) {
-                mvhline(obj.getY() + i, obj.getX(), ' ', obj.getWidth());
-            }
-            attroff(COLOR_PAIR(static_cast<short>(colorPair)));
-        }
-        else if (obj.getType() == ObjectType::CIRCLE) {
-            //TODO: Handle circle drawing
-            attron(COLOR_PAIR(static_cast<short>(colorPair)));
-            for (int i = 0; i < obj.getHeight(); ++i) {
-                mvhline(obj.getY() + i, obj.getX(), ' ', obj.getWidth());
-            }
-            attroff(COLOR_PAIR(static_cast<short>(colorPair)));
-        }
+    if (!_window) {
+        return;
     }
-    refresh();
+    
+    werase(_window);
+    box(_window, 0, 0);
+    
+    if (!objects.empty()) {
+        
+        for (const auto& obj : objects) {
+            int colorPair = createColorPair(obj.getColor());
+
+            wattron(_window, COLOR_PAIR(colorPair));
+
+            if (obj.getType() == ObjectType::TEXT) {
+                std::string text = obj.getText();
+                if (!text.empty()) {
+                    if (obj.getY() >= 0 && obj.getY() < _height && 
+                        obj.getX() >= 0 && obj.getX() < _width) {
+                        mvwprintw(_window, obj.getY(), obj.getX(), "%s", text.c_str());
+                    }
+                }
+            } else if (obj.getType() == ObjectType::RECTANGLE) {
+                for (int i = 0; i < obj.getHeight() && (obj.getY() + i) < _height; ++i) {
+                    for (int j = 0; j < obj.getWidth() && (obj.getX() + j) < _width; ++j) {
+                        if (obj.getY() + i >= 0 && obj.getX() + j >= 0) {
+                            mvwaddch(_window, obj.getY() + i, obj.getX() + j, '#');
+                        }
+                    }
+                }
+            } else if (obj.getType() == ObjectType::CIRCLE) {
+                int radius = obj.getWidth() / 2;
+                int centerX = obj.getX() + radius;
+                int centerY = obj.getY() + radius;
+                
+                int r_squared = radius * radius;
+                for (int y = -radius; y <= radius; y++) {
+                    if (centerY + y < 0 || centerY + y >= _height) continue;
+                    for (int x = -radius; x <= radius; x++) {
+                        if (centerX + x < 0 || centerX + x >= _width) continue;
+                        if (x*x + y*y <= r_squared) {
+                            mvwaddch(_window, centerY + y, centerX + x, 'O');
+                        }
+                    }
+                }
+            } else if (obj.getType() == ObjectType::SPRITE || obj.getType() == ObjectType::CUSTOM) {
+                for (int i = 0; i < obj.getHeight() && (obj.getY() + i) < _height; ++i) {
+                    for (int j = 0; j < obj.getWidth() && (obj.getX() + j) < _width; ++j) {
+                        if (obj.getY() + i >= 0 && obj.getX() + j >= 0) {
+                            mvwaddch(_window, obj.getY() + i, obj.getX() + j, '#');
+                        }
+                    }
+                }
+            }
+            wattroff(_window, COLOR_PAIR(colorPair));
+        }
+    } else {
+        mvwprintw(_window, _height/2, _width/2 - 7, "No objects to display");
+    }
+
+    wnoutrefresh(_window);
+    
+    doupdate();
 }
 
 extern "C" IDisplay* createDisplay() {

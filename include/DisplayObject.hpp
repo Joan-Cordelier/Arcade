@@ -58,8 +58,6 @@ class DisplayObject {
         void setY(int newY) { _y = newY; }
         void setWidth(int newWidth) { _width = newWidth; }
         void setHeight(int newHeight) { _height = newHeight; }
-        void setScaleX(int newScaleX) { _scaleX = newScaleX; }
-        void setScaleY(int newScaleY) { _scaleY = newScaleY; }
         void setType(ObjectType newType) { _type = newType; }
         void setColor(const Color& newColor) { _color = newColor; }
         void setText(const std::string& newText) { _text = newText; }
@@ -69,7 +67,7 @@ class DisplayObject {
         void setScaleX(float sx) { _scaleX = sx; }
         void setScaleY(float sy) { _scaleY = sy; }
     
-    protected:
+    private:
         int _x;
         int _y;
         int _width;

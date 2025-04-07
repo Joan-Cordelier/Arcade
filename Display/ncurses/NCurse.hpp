@@ -28,8 +28,12 @@ class NcurseDisplayer : public IDisplay {
         void display(const std::vector<DisplayObject>& objects) override;
 
     private:
-        bool _running;
+        bool _running = false;
         int _colorPairCount = 0;
+        std::vector<Color> _colors;  // Added to store created colors
+        WINDOW *_window = nullptr;  // Add window pointer
+        int _width = 0;
+        int _height = 0;
 
         int createColorPair(const Color& color);
 };

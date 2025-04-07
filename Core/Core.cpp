@@ -102,8 +102,6 @@ void Core::update()
     // Affiche les objets du jeu courant (menu ou jeu)
     const auto& objects = game->getDisplayData();
     display->display(objects);
-
-    display->display({});
 }
 
 
