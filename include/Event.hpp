@@ -14,7 +14,8 @@ enum class EventType {
     KEY_RELEASED,
     MOUSE_PRESSED,
     MOUSE_RELEASED,
-    MOUSE_MOVED
+    MOUSE_MOVED,
+    EXIT
 };
 
 enum class Key {
