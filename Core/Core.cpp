@@ -59,6 +59,16 @@ void Core::run()
     if (display == nullptr) {
         throw std::runtime_error("No display library loaded");
     }
+
+    if (game == nullptr) {
+        try {
+            game = libraryManager->loadGameLibrary("./lib/arcade_menu.so");
+        } catch (const std::exception& e) {
+            std::cerr << "Error loading menu: " << e.what() << std::endl;
+            isRunning = false;
+            return;
+        }
+    }    
     
     display->init(800, 600); //TODO: change it to xhat we want
     

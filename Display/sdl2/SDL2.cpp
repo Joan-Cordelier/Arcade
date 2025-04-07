@@ -36,6 +36,6 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
 {
 }
 
-extern "C" IDisplay* create() {
+extern "C" IDisplay* createDisplay() {
     return new SDL2();
 }

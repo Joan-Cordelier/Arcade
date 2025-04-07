@@ -21,7 +21,9 @@ class SDL2 : public IDisplay {
 
         void init(int width, int height) override;
         void stop() override;
+        
         Event pollEvent() override;
+        
         void clear() override;
         void display(const std::vector<DisplayObject>& objects) override;
     private:

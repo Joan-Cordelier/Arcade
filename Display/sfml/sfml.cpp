@@ -21,7 +21,7 @@ void SfmlDisplay::init(int width, int height) {
     window.create(sf::VideoMode(width * 32, height * 32), "Arcade - SFML");
     window.setFramerateLimit(60);
 
-    if (!font.loadFromFile("assets/font.ttf")) {
+    if (!font.loadFromFile("Display/assets/font.ttf")) {
         std::cerr << "Font not found!\n";
     }
 }

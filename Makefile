@@ -79,7 +79,7 @@ $(LIB_DIR)/arcade_sdl2.so:
 
 $(LIB_DIR)/arcade_menu.so:
 	@echo "Building Gmenu library: $@"
-	@g++ $(LIBFLAGS) -o $@ $(shell find Games/Gmenu \
+	@g++ $(LIBFLAGS) -o $@ $(shell find Games/menu \
 		-name "*.cpp" 2>/dev/null) -ldl
 
 # Object files compilation
