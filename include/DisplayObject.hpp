@@ -64,18 +64,24 @@ class DisplayObject {
         void setColor(const Color& newColor) { _color = newColor; }
         void setText(const std::string& newText) { _text = newText; }
         void setTexturePath(const std::string& newPath) { _texturePath = newPath; }
+
+        // SETTERS
+        void setScaleX(float sx) { _scaleX = sx; }
+        void setScaleY(float sy) { _scaleY = sy; }
     
-    private:
+    protected:
         int _x;
         int _y;
         int _width;
         int _height;
-        int _scaleX;
-        int _scaleY;
+
         ObjectType _type;
         Color _color;
         std::string _text;
         std::string _texturePath;
+
+        float _scaleX = 1.0f;
+        float _scaleY = 1.0f;
 };
 
 #endif /* !DISPLAYOBJECT_HPP_ */

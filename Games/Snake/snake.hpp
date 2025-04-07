@@ -1,10 +1,13 @@
 #pragma once
 
-#include "IGame.hpp"
+#include "../IGame.hpp"
+#include "../include/DisplayObject.hpp"
+#include "../include/Event.hpp"
 #include <vector>
 #include <utility>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 
 class Snake : public IGame {
 public:
@@ -15,6 +18,8 @@ public:
     void update(Event event) override;
     const std::vector<DisplayObject> getDisplayData() const override;
     int getScore() const override;
+    void stop() override;
+    bool isWall(int x, int y) const;
 
 private:
     enum Direction { UP, DOWN, LEFT, RIGHT };
@@ -27,6 +32,8 @@ private:
     int _width;
     int _height;
     bool _gameOver;
+    std::chrono::steady_clock::time_point _lastMoveTime;
+    const int _moveDelay = 150;
 
     void move();
     void generateFood();

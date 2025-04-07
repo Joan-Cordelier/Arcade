@@ -14,6 +14,7 @@ void Snake::reset() {
     _score = 0;
     _gameOver = false;
     generateFood();
+    _lastMoveTime = std::chrono::steady_clock::now();
 }
 
 void Snake::update(Event event) {
@@ -29,34 +30,41 @@ void Snake::update(Event event) {
     else if (event.key == Key::RIGHT && _dir != LEFT)
         _dir = RIGHT;
 
-    move();
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastMoveTime).count();
+
+    if (elapsed >= _moveDelay) {
+        move();
+        _lastMoveTime = now;
+    }
 }
 
 void Snake::move() {
     auto head = _snake.front();
     switch (_dir) {
-        case UP:    head.second--;break;
+        case UP:    head.second--; break;
         case DOWN:  head.second++; break;
         case LEFT:  head.first--; break;
         case RIGHT: head.first++; break;
     }
 
-    // Collision avec murs
-    if (head.first < 0 || head.first >= _width || head.second < 0 || head.second >= _height || isCollision(head.first, head.second)) {
+    if (head.first < 1 || head.first >= _width - 1 ||
+        head.second < 1 || head.second >= _height - 1 ||
+        isCollision(head.first, head.second)) {
         _gameOver = true;
         return;
     }
 
-    // Manger la nourriture
+    _snake.insert(_snake.begin(), head);
+
     if (head == _food) {
-        _snake.insert(_snake.begin(), head);
         _score++;
         generateFood();
     } else {
-        _snake.insert(_snake.begin(), head);
         _snake.pop_back();
     }
 }
+
 
 bool Snake::isCollision(int x, int y) const {
     for (const auto& part : _snake) {
@@ -66,47 +74,88 @@ bool Snake::isCollision(int x, int y) const {
     return false;
 }
 
+bool Snake::isWall(int x, int y) const {
+    return x == 0 || x == _width - 1 || y == 0 || y == _height - 1;
+}
+
 void Snake::generateFood() {
-    int x, y;
+    int x;
+    int y;
     do {
-        x = std::rand() % _width;
-        y = std::rand() % _height;
-    } while (isCollision(x, y));
+        x = std::rand() % (_width - 2);
+        y = std::rand() % (_height - 2);
+    } while (isCollision(x, y) || isWall(x, y));
     _food = {x, y};
 }
 
 const std::vector<DisplayObject> Snake::getDisplayData() const {
     std::vector<DisplayObject> data;
 
+    const int TILE_SIZE = 32;
+    const float SCALE = TILE_SIZE / 32.0f;
+
     // Bordures (haut et bas)
     for (int x = 0; x < _width; ++x) {
-        data.push_back(DisplayObject(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#"));
-        data.push_back(DisplayObject(x, _height - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#"));
+        DisplayObject topWall(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        topWall.setScaleX(SCALE);
+        topWall.setScaleY(SCALE);
+        data.push_back(topWall);
+
+        DisplayObject bottomWall(x, _height - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        bottomWall.setScaleX(SCALE);
+        bottomWall.setScaleY(SCALE);
+        data.push_back(bottomWall);
     }
 
     // Bordures (gauche et droite)
     for (int y = 0; y < _height; ++y) {
-        data.push_back(DisplayObject(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#"));
-        data.push_back(DisplayObject(_width - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#"));
+        DisplayObject leftWall(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        leftWall.setScaleX(SCALE);
+        leftWall.setScaleY(SCALE);
+        data.push_back(leftWall);
+
+        DisplayObject rightWall(_width - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        rightWall.setScaleX(SCALE);
+        rightWall.setScaleY(SCALE);
+        data.push_back(rightWall);
     }
 
     // Serpent
     for (const auto& part : _snake) {
-        data.push_back(DisplayObject(part.first, part.second, 1, 1, ObjectType::RECTANGLE, Color(0, 255, 0), "@"));
+        DisplayObject body(part.first, part.second, 1, 1, ObjectType::RECTANGLE, Color(0, 255, 0), "@");
+        body.setScaleX(SCALE);
+        body.setScaleY(SCALE);
+        data.push_back(body);
     }
 
     // Nourriture
-    data.push_back(DisplayObject(_food.first, _food.second, 1, 1, ObjectType::RECTANGLE, Color(255, 0, 0), "o"));
+    DisplayObject food(_food.first, _food.second, 1, 1, ObjectType::RECTANGLE, Color(255, 0, 0), "o");
+    food.setScaleX(SCALE);
+    food.setScaleY(SCALE);
+    data.push_back(food);
 
     // Texte si game over
     if (_gameOver) {
-        data.push_back(DisplayObject(_width / 2 - 5, _height / 2, 10, 1, ObjectType::TEXT, Color(255, 0, 0), "GAME OVER"));
+        DisplayObject gameOver(_width / 2 - 5, _height / 2, 10, 1, ObjectType::TEXT, Color(255, 0, 0), "GAME OVER");
+        gameOver.setScaleX(1.0f);
+        gameOver.setScaleY(1.0f); // Texte généralement non scale
+        data.push_back(gameOver);
     }
 
     return data;
 }
 
 
+
 int Snake::getScore() const {
     return _score;
+}
+
+void Snake::stop()
+{
+}
+
+extern "C" IGame *createGame()
+{
+    return new Snake();
 }
