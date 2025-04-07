@@ -3,3 +3,4 @@ obj
 arcade
 .vscode
 *.log
+*.dat

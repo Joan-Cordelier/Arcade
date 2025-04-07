@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** Arcade
+** File description:
+** IDisplay.hpp
+*/
+
 #ifndef IDISPLAY_HPP_
 #define IDISPLAY_HPP_
 
@@ -17,8 +24,6 @@ public:
 
     virtual void clear() = 0;
     virtual void display(const std::vector<DisplayObject>& objects) = 0;
-
-    virtual void drawText(int x, int y, const std::string& text) = 0;
 };
 
 extern "C" IDisplay* createDisplay();

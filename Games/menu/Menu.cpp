@@ -1,39 +1,55 @@
+/*
+** EPITECH PROJECT, 2024
+** Arcade
+** File description:
+** Menu.cpp
+*/
+
 #include "Menu.hpp"
 
-Menu::Menu() {
-    options = { "Start Game", "High Scores", "Exit" };
-    selectedIndex = 0;
+
+Menu::Menu()
+{
+    _score = 0;
+    _selectedIndex = 0;
+    _games = {"Game1", "Game2", "Game3"};
+    _displays = {"Display1", "Display2", "Display3"};
+    _currentGame = _games[0];
+    _currentDisplay = _displays[0];
 }
 
-void Menu::reset() {
-    selectedIndex = 0;
+Menu::~Menu()
+{
 }
 
-void Menu::update(Event event) {
-    if (event == Event::UP && selectedIndex > 0)
-        selectedIndex--;
-    else if (event == Event::DOWN && selectedIndex < options.size() - 1)
-        selectedIndex++;
-    else if (event == Event::VALIDATE) {
-    }
+void Menu::reset()
+{
+    _score = 0;
+    _selectedIndex = 0;
+    _currentGame = _games[0];
+    _currentDisplay = _displays[0];
 }
 
-std::vector<DisplayObject> Menu::getDisplayData() const {
-    std::vector<DisplayObject> data;
-    int y = 5;
-
-    for (size_t i = 0; i < options.size(); ++i) {
-        std::string text = (i == selectedIndex ? "> " : "  ") + options[i];
-        data.push_back(DisplayObject{5, static_cast<int>(y + i), TileType::TEXT, text});
-    }
-
-    return data;
+void Menu::update(Event event)
+{
 }
 
-int Menu::getScore() const {
-    return 0;
+std::vector<DisplayObject> Menu::getDisplayData() const
+{
+    std::vector<DisplayObject> displayData;
+    return displayData;
 }
 
-extern "C" IGame* createGame() {
+int Menu::getScore() const
+{
+    return _score;
+}
+
+void Menu::stop()
+{
+}
+
+extern "C" IGame* createGame()
+{
     return new Menu();
 }

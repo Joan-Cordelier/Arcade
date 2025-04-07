@@ -2,28 +2,40 @@
 ** EPITECH PROJECT, 2025
 ** B-OOP-400-TLS-4-1-arcade-melissa.muller
 ** File description:
-** NCurse
+** NcurseDisplayer
 */
 
+#include <vector>
+#include <ncurses.h>
 #include "../IDisplay.hpp"
+#include "../include/DisplayObject.hpp"
+#include "../include/Event.hpp"
 
-#ifndef NCURSE_HPP_
-#define NCURSE_HPP_
+#ifndef NcurseDisplayer_HPP_
+#define NcurseDisplayer_HPP_
 
-class NCurse : public IDisplay {
+class NcurseDisplayer : public IDisplay {
     public:
-        NCurse();
-        ~NCurse();
+        NcurseDisplayer();
+        ~NcurseDisplayer() override;
 
-        int getEvent() override;
-        void display() override;
+        void init(int width, int height) override;
+        void stop() override;
 
-    protected:
+        Event pollEvent() override;
+
+        void clear() override;
+        void display(const std::vector<DisplayObject>& objects) override;
+
     private:
+        bool _running;
+        int _colorPairCount = 0;
+
+        int createColorPair(const Color& color);
 };
 
-extern "C" IDisplay* create() {
-    return new NCurse();
+extern "C" IDisplay* createDisplay() {
+    return new NcurseDisplayer();
 }
 
-#endif /* !NCURSE_HPP_ */
+#endif /* !NcurseDisplayer_HPP_ */
