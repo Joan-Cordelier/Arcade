@@ -49,6 +49,7 @@ Event SfmlDisplay::pollEvent() {
                 case sf::Keyboard::Space: return {EventType::KEY_PRESSED, Key::SPACE, {-1, -1, -1}};
                 case sf::Keyboard::Enter: return {EventType::KEY_PRESSED, Key::ENTER, {-1, -1, -1}};
                 case sf::Keyboard::Escape: return {EventType::KEY_PRESSED, Key::ESCAPE, {-1, -1, -1}};
+                case sf::Keyboard::F: return {EventType::KEY_PRESSED, Key::F, {-1, -1, -1}};
                 default: break;
             }
         }

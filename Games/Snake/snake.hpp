@@ -35,6 +35,8 @@ private:
     std::chrono::steady_clock::time_point _lastMoveTime;
     const int _moveDelay = 150;
 
+    bool _inMenu = true;
+
     void move();
     void generateFood();
     bool isCollision(int x, int y) const;

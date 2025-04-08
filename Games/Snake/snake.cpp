@@ -1,6 +1,7 @@
 #include "snake.hpp"
 
 Snake::Snake() {
+    _inMenu = true;
     _width = 30;
     _height = 20;
     std::srand(std::time(nullptr));
@@ -8,8 +9,15 @@ Snake::Snake() {
 }
 
 void Snake::reset() {
+    _inMenu = true;
     _snake.clear();
-    _snake.push_back({_width / 2, _height / 2});
+    int startX = _width / 2;
+    int startY = _height / 2;
+
+    _snake.push_back({startX, startY});
+    _snake.push_back({startX - 1, startY});
+    _snake.push_back({startX - 3, startY});    
+    
     _dir = RIGHT;
     _score = 0;
     _gameOver = false;
