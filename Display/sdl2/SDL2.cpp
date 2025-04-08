@@ -29,8 +29,11 @@ void SDL2::init(int width, int height)
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderPresent(_renderer);
     SDL_ShowCursor(SDL_DISABLE);
-    //_font = TTF_OpenFont("Font.ttf", 3); //en vérité je ne sais pas quelle font size il faut mettre donc c'est assez aléatoire
-    //SDL_Color _textColor = {255, 255, 255, 255};
+    TTF_Init();
+    _font = TTF_OpenFont("Display/assets/font.ttf", 20);
+    if (!_font) {
+        std::cerr << "Erreur lors de l'ouverture de la police : " << TTF_GetError() << std::endl;
+    }
     _running = true;
 }
 
@@ -354,27 +357,29 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
                 SDL_RenderFillRect(_renderer, &rect);
             }
             if (type == ObjectType::TEXT) {
-                break;
+                SDL_Surface* surf = TTF_RenderText_Solid(_font, obj.getText().c_str(), {obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a});
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surf);
+                SDL_FreeSurface(surf);
+                SDL_Rect textrect = {obj.getX() * 27, obj.getY() * 27, obj.getWidth() * 27, obj.getHeight() * 27};
+                SDL_RenderCopy(_renderer, texture, nullptr, &textrect);
+                SDL_DestroyTexture(texture);
             }
             if (type == ObjectType::SPRITE) {
-                break;
             }
             if (type  == ObjectType::CUSTOM) {
-                break;
             }
             if (type == ObjectType::CIRCLE) {
-                for (int i = 0; i < obj.getHeight(); ++i) {
-                    int offsetX = obj.getWidth() / 2;
-                    int offsetY = obj.getHeight() / 2;
-                    for (int j = 0; j < obj.getWidth(); ++j) {
+                for (int i = 0; i < obj.getHeight() * 27; ++i) {
+                    int offsetX = obj.getWidth() * 27 / 2;
+                    int offsetY = obj.getHeight() * 27 / 2;
+                    for (int j = 0; j < obj.getWidth() * 27; ++j) {
                         int dx = j - offsetX;
                         int dy = i - offsetY;
                         if (dx * dx + dy * dy <= offsetX * offsetX) {
-                            SDL_RenderDrawPoint(_renderer, obj.getX() + j, obj.getY() + i);
+                            SDL_RenderDrawPoint(_renderer, obj.getX() * 27 + j, obj.getY() * 27 + i);
                         }
                     }
                 }
-                break;
             }
     }
     SDL_RenderPresent(_renderer);

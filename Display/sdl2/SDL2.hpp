@@ -8,7 +8,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <ostream>
-//#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_ttf.h>
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
 #include "../include/Event.hpp"
@@ -33,8 +33,8 @@ class SDL2 : public IDisplay {
     SDL_Window *_window;
     SDL_Renderer *_renderer;
     bool _running;
-    //TTF_Font* _font;
-    //SDL_Color _textColor;
+    TTF_Font* _font;
+    SDL_Color _textColor;
 };
 
 extern "C" IDisplay* create()
