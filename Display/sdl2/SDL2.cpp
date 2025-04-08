@@ -329,7 +329,11 @@ Event SDL2::pollEvent()
         }
     }
 
-    return Key::NONE;
+    return {
+            EventType::NONE,
+            Key::NONE,
+            {-1, -1, -1}
+        };
 }
 
 void SDL2::clear() 
@@ -341,23 +345,23 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
 {
     for (const auto& obj : objects) {
         SDL_SetRenderDrawColor(_renderer, obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
-
-        switch (obj.getType()) {
-            case ObjectType::RECTANGLE:
+        ObjectType type = obj.getType();
+            if (type == ObjectType::RECTANGLE) {
                 SDL_Rect rect = { obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight() };
                 SDL_RenderFillRect(_renderer, &rect);
                 break;
-            case ObjectType::TEXT:
+            }
+            if (type == ObjectType::TEXT) {
                 std::cout << "Affichage du texte: " << obj.getText() << std::endl;
                 break;
-
-            case ObjectType::SPRITE:
+            }
+            if (type == ObjectType::SPRITE) {
                 break;
-
-            case ObjectType::CUSTOM:
+            }
+            if (type  == ObjectType::CUSTOM) {
                 break;
-
-            case ObjectType::CIRCLE:
+            }
+            if (type == ObjectType::CIRCLE) {
                 for (int i = 0; i < obj.getHeight(); ++i) {
                     int offsetX = obj.getWidth() / 2;
                     int offsetY = obj.getHeight() / 2;
