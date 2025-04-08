@@ -30,7 +30,7 @@ void SDL2::init(int width, int height)
     SDL_RenderPresent(_renderer);
     SDL_ShowCursor(SDL_DISABLE);
     //_font = TTF_OpenFont("Font.ttf", 3); //en vérité je ne sais pas quelle font size il faut mettre donc c'est assez aléatoire
-    //SDL_Color _textColor = {255, 255, 255};
+    //SDL_Color _textColor = {255, 255, 255, 255};
     _running = true;
 }
 
@@ -338,6 +338,7 @@ Event SDL2::pollEvent()
 
 void SDL2::clear() 
 {
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderClear(_renderer);
 }
 
@@ -347,12 +348,12 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
         SDL_SetRenderDrawColor(_renderer, obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
         ObjectType type = obj.getType();
             if (type == ObjectType::RECTANGLE) {
-                SDL_Rect rect = { obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight() };
+                int scaledWidth = static_cast<int>(obj.getWidth() * obj.getScaleX() * 27.0f);
+                int scaledHeight = static_cast<int>(obj.getHeight() * obj.getScaleY() * 27.0f);
+                SDL_Rect rect = { obj.getX() * 27, obj.getY() * 27, scaledWidth, scaledHeight};
                 SDL_RenderFillRect(_renderer, &rect);
-                break;
             }
             if (type == ObjectType::TEXT) {
-                std::cout << "Affichage du texte: " << obj.getText() << std::endl;
                 break;
             }
             if (type == ObjectType::SPRITE) {
@@ -374,7 +375,11 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
                     }
                 }
                 break;
-        }
+            }
     }
     SDL_RenderPresent(_renderer);
+}
+
+extern "C" IDisplay* createDisplay() {
+    return new SDL2();
 }
