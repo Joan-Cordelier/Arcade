@@ -357,12 +357,12 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
                 SDL_RenderFillRect(_renderer, &rect);
             }
             if (type == ObjectType::TEXT) {
-                SDL_Surface* surf = TTF_RenderText_Solid(_font, obj.getText().c_str(), {obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a});
-                SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surf);
-                SDL_FreeSurface(surf);
-                SDL_Rect textrect = {obj.getX() * 27, obj.getY() * 27, obj.getWidth() * 27, obj.getHeight() * 27};
-                SDL_RenderCopy(_renderer, texture, nullptr, &textrect);
-                SDL_DestroyTexture(texture);
+                    SDL_Surface* surf = TTF_RenderText_Solid(_font, obj.getText().c_str(), {obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a});
+                    SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surf);
+                    SDL_FreeSurface(surf);
+                    SDL_Rect textrect = {obj.getX() * 27, obj.getY() * 27, obj.getWidth() * obj.getScaleX() * 27, obj.getHeight() * obj.getScaleY() * 27};
+                    SDL_RenderCopy(_renderer, texture, nullptr, &textrect);
+                    SDL_DestroyTexture(texture);
             }
             if (type == ObjectType::SPRITE) {
             }
