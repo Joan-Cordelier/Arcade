@@ -95,9 +95,12 @@ void Demineur::handleInput(Event event) {
     int& y = _cursor.second;
 
     if (event.key == Key::UP && y > 0) y--;
-    else if (event.key == Key::DOWN && y < _height - 1) y++;
-    else if (event.key == Key::LEFT && x > 0) x--;
-    else if (event.key == Key::RIGHT && x < _width - 1) x++;
+    else if (event.key == Key::DOWN && y < _height - 1)
+        y++;
+    else if (event.key == Key::LEFT && x > 0)
+        x--;
+    else if (event.key == Key::RIGHT && x < _width - 1)
+        x++;
     else if (event.key == Key::F) {
         _board[y * _width + x].isFlagged = !_board[y * _width + x].isFlagged;
     }
@@ -152,8 +155,8 @@ const std::vector<DisplayObject> Demineur::getDisplayData() const {
     }
 
     // Affichage du plateau
-    for (int y = 0; y < _height; ++y) {
-        for (int x = 0; x < _width; ++x) {
+    for (int y = 0; y < _height; y++) {
+        for (int x = 0; x < _width; x++) {
             const Cell& cell = _board[y * _width + x];
             std::string content = "#";
             Color color(200, 200, 200);
@@ -184,6 +187,17 @@ const std::vector<DisplayObject> Demineur::getDisplayData() const {
         title.setScaleX(1.0f);
         title.setScaleY(1.0f);
         data.push_back(title);
+        for (int y = 0; y < _height; ++y) {
+        for (int x = 0; x < _width; ++x) {
+            const Cell& cell = _board[y * _width + x];
+            if (cell.isBomb && !cell.isRevealed) {
+                DisplayObject bomb(x, y, 1, 1, ObjectType::TEXT, Color(255, 0, 0), "*");
+                bomb.setScaleX(1.0f);
+                bomb.setScaleY(1.0f);
+                data.push_back(bomb);
+            }
+        }
+    }
     } else if (_won) {
         DisplayObject title(5, _height + 2, 1, 1, ObjectType::TEXT, Color(0, 255, 0), "You Win!");
         title.setScaleX(1.0f);
