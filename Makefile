@@ -22,7 +22,7 @@ SRCS_CORE = $(shell find $(DIR_CORE) -name "*.cpp")
 OBJS_CORE = $(SRCS_CORE:%.cpp=$(OBJ_DIR)/%.o)
 
 # Display libraries
-DISPLAY_LIBS = ncurses sfml sdl2 
+DISPLAY_LIBS = ncurses sfml sdl2
 DISPLAY_TARGETS = $(addprefix $(LIB_DIR)/arcade_, \
 	$(addsuffix .so, $(DISPLAY_LIBS)))
 
