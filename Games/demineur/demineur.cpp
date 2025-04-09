@@ -180,9 +180,15 @@ const std::vector<DisplayObject> Demineur::getDisplayData() const {
     }
 
     if (_gameOver) {
-        data.emplace_back(5, _height + 2, 1, 1, ObjectType::TEXT, Color(255, 0, 0), "Game Over!");
+        DisplayObject title(5, _height + 2, 1, 1, ObjectType::TEXT, Color(255, 0, 0), "Game Over!");
+        title.setScaleX(1.0f);
+        title.setScaleY(1.0f);
+        data.push_back(title);
     } else if (_won) {
-        data.emplace_back(5, _height + 2, 1, 1, ObjectType::TEXT, Color(0, 255, 0), "You Win!");
+        DisplayObject title(5, _height + 2, 1, 1, ObjectType::TEXT, Color(0, 255, 0), "You Win!");
+        title.setScaleX(1.0f);
+        title.setScaleY(1.0f);
+        data.push_back(title);
     }
 
     return data;

@@ -62,7 +62,7 @@ void Core::run()
 
     if (game == nullptr) {
         try {
-            game = libraryManager->loadGameLibrary("./lib/arcade_snake.so");
+            game = libraryManager->loadGameLibrary("./lib/arcade_demineur.so");
         } catch (const std::exception& e) {
             std::cerr << "Error loading menu: " << e.what() << std::endl;
             isRunning = false;
