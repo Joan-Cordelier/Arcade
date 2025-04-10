@@ -62,7 +62,7 @@ void Core::run()
 
     if (game == nullptr) {
         try {
-            game = libraryManager->loadGameLibrary("./lib/arcade_demineur.so");
+            game = libraryManager->loadGameLibrary("./lib/arcade_snake.so");
         } catch (const std::exception& e) {
             std::cerr << "Error loading menu: " << e.what() << std::endl;
             isRunning = false;
@@ -102,7 +102,7 @@ void Core::update()
     // Affiche les objets du jeu courant (menu ou jeu)
     auto objects = game->getDisplayData();
     std::string scoreText = "Score: " + std::to_string(game->getScore());
-    DisplayObject scoreDisplay(40, 10, 1, 1, ObjectType::TEXT, Color(255, 255, 0), scoreText);
+    DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
     scoreDisplay.setScaleX(1.0f);
     scoreDisplay.setScaleY(1.0f);
     objects.push_back(scoreDisplay);

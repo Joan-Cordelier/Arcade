@@ -21,8 +21,8 @@ void SDL2::init(int width, int height)
         "Window SDL2",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        width,
-        height,
+        width * 2.25,
+        height * 1.75,
         SDL_WINDOW_SHOWN
     );
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
@@ -351,16 +351,16 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
         SDL_SetRenderDrawColor(_renderer, obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
         ObjectType type = obj.getType();
             if (type == ObjectType::RECTANGLE) {
-                int scaledWidth = static_cast<int>(obj.getWidth() * obj.getScaleX() * 27.0f);
-                int scaledHeight = static_cast<int>(obj.getHeight() * obj.getScaleY() * 27.0f);
-                SDL_Rect rect = { obj.getX() * 27, obj.getY() * 27, scaledWidth, scaledHeight};
+                int scaledWidth = static_cast<int>(obj.getWidth() * obj.getScaleX() * 32.0f);
+                int scaledHeight = static_cast<int>(obj.getHeight() * obj.getScaleY() * 32.0f);
+                SDL_Rect rect = { obj.getX() * 32, obj.getY() * 32, scaledWidth, scaledHeight};
                 SDL_RenderFillRect(_renderer, &rect);
             }
             if (type == ObjectType::TEXT) {
                     SDL_Surface* surf = TTF_RenderText_Solid(_font, obj.getText().c_str(), {obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a});
                     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surf);
                     SDL_FreeSurface(surf);
-                    SDL_Rect textrect = {obj.getX() * 27, obj.getY() * 27, obj.getWidth() * obj.getScaleX() * 27, obj.getHeight() * obj.getScaleY() * 27};
+                    SDL_Rect textrect = {obj.getX() * 32, obj.getY() * 32, obj.getWidth() * obj.getScaleX() * 32, obj.getHeight() * obj.getScaleY() * 32};
                     SDL_RenderCopy(_renderer, texture, nullptr, &textrect);
                     SDL_DestroyTexture(texture);
             }
@@ -369,14 +369,14 @@ void SDL2::display(const std::vector<DisplayObject>& objects)
             if (type  == ObjectType::CUSTOM) {
             }
             if (type == ObjectType::CIRCLE) {
-                for (int i = 0; i < obj.getHeight() * 27; ++i) {
-                    int offsetX = obj.getWidth() * 27 / 2;
-                    int offsetY = obj.getHeight() * 27 / 2;
-                    for (int j = 0; j < obj.getWidth() * 27; ++j) {
+                for (int i = 0; i < obj.getHeight() * 32; ++i) {
+                    int offsetX = obj.getWidth() * 32 / 2;
+                    int offsetY = obj.getHeight() * 32 / 2;
+                    for (int j = 0; j < obj.getWidth() * 32; ++j) {
                         int dx = j - offsetX;
                         int dy = i - offsetY;
                         if (dx * dx + dy * dy <= offsetX * offsetX) {
-                            SDL_RenderDrawPoint(_renderer, obj.getX() * 27 + j, obj.getY() * 27 + i);
+                            SDL_RenderDrawPoint(_renderer, obj.getX() * 32 + j, obj.getY() * 32 + i);
                         }
                     }
                 }

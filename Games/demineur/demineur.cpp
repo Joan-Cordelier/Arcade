@@ -144,12 +144,12 @@ const std::vector<DisplayObject> Demineur::getDisplayData() const {
     std::vector<DisplayObject> data;
 
     if (_inMenu) {
-        data.emplace_back(5, 1, 8, 1.5, ObjectType::TEXT, Color(255, 255, 255), "== Choix Difficulte ==");
+        data.emplace_back(5, 1, 14, 1.75, ObjectType::TEXT, Color(255, 255, 255), "== Choix Difficulte ==");
 
         for (size_t i = 0; i < _difficulties.size(); ++i) {
             std::string label = (_selectedDifficulty == static_cast<int>(i) ? "> " : "  ");
             label += std::to_string(_difficulties[i]) + " bombes";
-            data.emplace_back(5, 3 + i, 8, 1.5, ObjectType::TEXT, Color(0, 255, 0), label);
+            data.emplace_back(5, 3 + i, 14, 1.75, ObjectType::TEXT, Color(0, 255, 0), label);
         }
         return data;
     }
