@@ -100,7 +100,13 @@ void Core::update()
     display->clear();
 
     // Affiche les objets du jeu courant (menu ou jeu)
-    const auto& objects = game->getDisplayData();
+    auto objects = game->getDisplayData();
+    std::string scoreText = "Score: " + std::to_string(game->getScore());
+    DisplayObject scoreDisplay(40, 10, 1, 1, ObjectType::TEXT, Color(255, 255, 0), scoreText);
+    scoreDisplay.setScaleX(1.0f);
+    scoreDisplay.setScaleY(1.0f);
+    objects.push_back(scoreDisplay);
+
     display->display(objects);
 }
 
