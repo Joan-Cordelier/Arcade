@@ -26,6 +26,7 @@ Core::Core(const std::string& initialLibrary)
             throw std::runtime_error("Failed to load initial display library");
         }
     } catch (const std::exception& e) {
+        std::cerr << "Exception in Core constructor: " << e.what() << std::endl;
         if (display != nullptr) {
             display->stop();
             display = nullptr;
@@ -36,22 +37,7 @@ Core::Core(const std::string& initialLibrary)
 
 Core::~Core()
 {
-    if (libraryManager != nullptr) {
-        libraryManager->closeDisplayLibrary();
-        libraryManager->closeGameLibrary();
-    }
-    if (menuManager != nullptr) {
-        menuManager->setMenuState(false);
-    }
-    if (scoreManager != nullptr) {
-        scoreManager->saveScores();
-    }
-    if (display != nullptr) {
-        display->stop();
-    }
-    if (game != nullptr) {
-        game->stop();
-    }
+    exitGame();
 }
 
 void Core::run()
@@ -59,57 +45,87 @@ void Core::run()
     if (display == nullptr) {
         throw std::runtime_error("No display library loaded");
     }
+    if (menuManager == nullptr) {
+        throw std::runtime_error("No menu manager initialized");
+    }
+    if (libraryManager == nullptr) {
+        throw std::runtime_error("No library manager initialized");
+    }
+    if (scoreManager == nullptr) {
+        throw std::runtime_error("No score manager initialized");
+    }
+    
+    try {
+        display->init(800, 600);
+        isRunning = true;
 
-    if (game == nullptr) {
-        try {
-            game = libraryManager->loadGameLibrary("./lib/arcade_snake.so");
-        } catch (const std::exception& e) {
-            std::cerr << "Error loading menu: " << e.what() << std::endl;
-            isRunning = false;
-            return;
+        while (isRunning) {
+            Event event = display->pollEvent();
+
+            if (event.type == EventType::KEY_PRESSED && event.key == Key::ESCAPE) {
+                if (menuManager->isInMenu())
+                    isRunning = false;
+                else
+                    menuManager->setMenuState(true);
+                continue;
+            }
+
+            if (event.type == EventType::KEY_PRESSED && event.key == Key::F1) {
+                nextDisplay();
+                continue;
+            }
+
+            if (event.type == EventType::KEY_PRESSED && event.key == Key::F2) {
+                nextGame();
+                continue;
+            }
+
+            if (menuManager->isInMenu()) {
+                menuManager->update(event);
+                
+                if (!menuManager->isInMenu()) {
+                    try {
+                        game = libraryManager->loadGameLibrary(
+                            libraryManager->getCurrentGameName());
+                    } catch (const std::exception& e) {
+                        std::cerr << "Error loading game: " << e.what() << std::endl;
+                        menuManager->setMenuState(true);
+                    }
+                }
+            } else if (game != nullptr) {
+                game->update(event);
+            }
+
+            update();
         }
-    }    
-
-    display->init(800, 600);
-    isRunning = true;
-
-    while (isRunning) {
-        Event event = display->pollEvent();
-
-        if (event.type == EventType::KEY_PRESSED && event.key == Key::ESCAPE) {
-            isRunning = false;
-            continue;
-        }
-
-        // Update le jeu courant (menu ou autre)
-        if (game != nullptr)
-            game->update(event);
-
-        update();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception in Core::run: " << e.what() << std::endl;
     }
 
     exitGame();
 }
 
-
 void Core::update()
 {
-    if (display == nullptr || game == nullptr)
+    if (display == nullptr)
         return;
 
     display->clear();
 
-    // Affiche les objets du jeu courant (menu ou jeu)
-    auto objects = game->getDisplayData();
-    std::string scoreText = "Score: " + std::to_string(game->getScore());
-    DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
-    scoreDisplay.setScaleX(1.0f);
-    scoreDisplay.setScaleY(1.0f);
-    objects.push_back(scoreDisplay);
+    if (menuManager->isInMenu()) {
+        auto menuObjects = menuManager->getDisplayData();
+        display->display(menuObjects);
+    } else if (game != nullptr) {
+        auto objects = game->getDisplayData();
+        std::string scoreText = "Score: " + std::to_string(game->getScore());
+        DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
+        scoreDisplay.setScaleX(1.0f);
+        scoreDisplay.setScaleY(1.0f);
+        objects.push_back(scoreDisplay);
 
-    display->display(objects);
+        display->display(objects);
+    }
 }
-
 
 void Core::nextDisplay()
 {
@@ -149,23 +165,28 @@ void Core::goToMenu()
 
 void Core::exitGame()
 {
+    isRunning = false;
+    
     if (game != nullptr) {
         game->stop();
         game = nullptr;
     }
+    
     if (display != nullptr) {
         display->stop();
         display = nullptr;
     }
+    
     if (libraryManager != nullptr) {
         libraryManager->closeDisplayLibrary();
         libraryManager->closeGameLibrary();
     }
+    
     if (menuManager != nullptr) {
         menuManager->setMenuState(false);
     }
+    
     if (scoreManager != nullptr) {
         scoreManager->saveScores();
     }
-    isRunning = false;
 }

@@ -5,26 +5,46 @@
 ** NCurse.cpp
 */
 
-#include <iostream>
 #include "NCurse.hpp"
 
 NcurseDisplayer::NcurseDisplayer()
 {
+    _window = nullptr;
+    _running = false;
+    _height = 0;
+    _width = 0;
+    _originalHeight = 0;
+    _originalWidth = 0;
+    _scaleX = 6;
+    _scaleY = 2;
 }
 
 NcurseDisplayer::~NcurseDisplayer()
 {
-
+    stop();
 }
 
 void NcurseDisplayer::init(int width, int height)
 {
+    if (_running) {
+        stop();
+    }
+    
     initscr();
+    
+    if (!stdscr) {
+        std::cerr << "Failed to initialize ncurses" << std::endl;
+        return;
+    }
+    
     raw();
     noecho();
     keypad(stdscr, TRUE);
-    curs_set(0);  // TODO: maybe add a cursor for certain modes
-    start_color();
+    curs_set(0);
+    
+    if (start_color() == ERR) {
+        std::cerr << "Unable to start colors" << std::endl;
+    }
     
     if (!has_colors()) {
         endwin();
@@ -32,11 +52,12 @@ void NcurseDisplayer::init(int width, int height)
         return;
     }
     
-    // Use screen size rather than passed dimensions for better compatibility
+    _originalWidth = width;
+    _originalHeight = height;
+
     _width = COLS;
     _height = LINES;
     
-    // Create a window that fills the entire screen
     _window = newwin(_height, _width, 0, 0);
     if (!_window) {
         endwin();
@@ -46,37 +67,59 @@ void NcurseDisplayer::init(int width, int height)
     
     keypad(_window, TRUE);
     
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(4, COLOR_BLUE, COLOR_BLACK);
-    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(6, COLOR_CYAN, COLOR_BLACK);
-    init_pair(7, COLOR_WHITE, COLOR_BLACK);
+    for (int i = 1; i <= 7; i++) {
+        init_pair(i, i, COLOR_BLACK);
+    }
     
     nodelay(_window, TRUE);
     
     box(_window, 0, 0);
     wrefresh(_window);
     
+    _colors.clear();
+    
     _running = true;
 }
 
 void NcurseDisplayer::stop()
 {
+    if (!_running)
+        return;
+        
     _running = false;
-    if (_window) {
-        delwin(_window);
-        _window = nullptr;
+    
+    try {
+        _colors.clear();
+        
+        if (_window) {
+            wclear(_window);
+            wrefresh(_window);
+            delwin(_window);
+            _window = nullptr;
+        }
+        
+        clear();
+        refresh();
+        endwin();
+        
+        std::cout << "NCurses: Display stopped successfully" << std::endl;
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    } catch (const std::exception& e) {
+        std::cerr << "NCurses: Error while stopping: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "NCurses: Unknown error while stopping" << std::endl;
     }
-    endwin();
 }
 
 Event NcurseDisplayer::pollEvent()
 {
-    nodelay(stdscr, TRUE);
-    int key = getch();
-    nodelay(stdscr, FALSE);
+    if (!_running || !_window)
+        return {EventType::NONE, Key::NONE, {-1, -1, -1}};
+    
+    nodelay(_window, TRUE);
+    int key = wgetch(_window);
+    nodelay(_window, FALSE);
     
     if (key == ERR) {
         return {
@@ -122,6 +165,12 @@ Event NcurseDisplayer::pollEvent()
             return {
                 EventType::KEY_PRESSED,
                 Key::ESCAPE,
+                {-1, -1, -1}
+            };
+        case 32:
+            return {
+                EventType::KEY_PRESSED,
+                Key::SPACE,
                 {-1, -1, -1}
             };
         case KEY_BACKSPACE:
@@ -397,10 +446,8 @@ Event NcurseDisplayer::pollEvent()
 void NcurseDisplayer::clear()
 {
     if (_window) {
-        // Use werase instead of wclear to avoid blinking
         werase(_window);
-        box(_window, 0, 0); // Redraw border
-        // Don't refresh here, let display() handle it
+        box(_window, 0, 0);
     }
 }
 
@@ -435,7 +482,7 @@ int NcurseDisplayer::createColorPair(const Color& color)
 
 void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
 {
-    if (!_window) {
+    if (!_window || !_running) {
         return;
     }
     
@@ -446,45 +493,54 @@ void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
         
         for (const auto& obj : objects) {
             int colorPair = createColorPair(obj.getColor());
+            
+            int origX = obj.getX();
+            int origY = obj.getY();
+            int origWidth = obj.getWidth();
+            int origHeight = obj.getHeight();
+            
+            int x = origX * _scaleX;
+            int y = origY * _scaleY;
+            int width = origWidth * _scaleX;
+            int height = origHeight * _scaleY;
 
             wattron(_window, COLOR_PAIR(colorPair));
 
             if (obj.getType() == ObjectType::TEXT) {
                 std::string text = obj.getText();
                 if (!text.empty()) {
-                    if (obj.getY() >= 0 && obj.getY() < _height && 
-                        obj.getX() >= 0 && obj.getX() < _width) {
-                        mvwprintw(_window, obj.getY(), obj.getX(), "%s", text.c_str());
+                    if (y >= 0 && y < _height && x >= 0 && x < _width) {
+                        mvwprintw(_window, y, x, "%s", text.c_str());
                     }
                 }
             } else if (obj.getType() == ObjectType::RECTANGLE) {
-                for (int i = 0; i < obj.getHeight() && (obj.getY() + i) < _height; ++i) {
-                    for (int j = 0; j < obj.getWidth() && (obj.getX() + j) < _width; ++j) {
-                        if (obj.getY() + i >= 0 && obj.getX() + j >= 0) {
-                            mvwaddch(_window, obj.getY() + i, obj.getX() + j, '#');
+                for (int i = 0; i < height && (y + i) < _height; ++i) {
+                    for (int j = 0; j < width && (x + j) < _width; ++j) {
+                        if (y + i >= 0 && x + j >= 0) {
+                            mvwaddch(_window, y + i, x + j, '#');
                         }
                     }
                 }
             } else if (obj.getType() == ObjectType::CIRCLE) {
-                int radius = obj.getWidth() / 2;
-                int centerX = obj.getX() + radius;
-                int centerY = obj.getY() + radius;
+                int radius = width / 2;
+                int centerX = x + radius;
+                int centerY = y + radius;
                 
                 int r_squared = radius * radius;
-                for (int y = -radius; y <= radius; y++) {
-                    if (centerY + y < 0 || centerY + y >= _height) continue;
-                    for (int x = -radius; x <= radius; x++) {
-                        if (centerX + x < 0 || centerX + x >= _width) continue;
-                        if (x*x + y*y <= r_squared) {
-                            mvwaddch(_window, centerY + y, centerX + x, 'O');
+                for (int cy = -radius; cy <= radius; cy++) {
+                    if (centerY + cy < 0 || centerY + cy >= _height) continue;
+                    for (int cx = -radius; cx <= radius; cx++) {
+                        if (centerX + cx < 0 || centerX + cx >= _width) continue;
+                        if (cx*cx + cy*cy <= r_squared) {
+                            mvwaddch(_window, centerY + cy, centerX + cx, 'O');
                         }
                     }
                 }
             } else if (obj.getType() == ObjectType::SPRITE || obj.getType() == ObjectType::CUSTOM) {
-                for (int i = 0; i < obj.getHeight() && (obj.getY() + i) < _height; ++i) {
-                    for (int j = 0; j < obj.getWidth() && (obj.getX() + j) < _width; ++j) {
-                        if (obj.getY() + i >= 0 && obj.getX() + j >= 0) {
-                            mvwaddch(_window, obj.getY() + i, obj.getX() + j, '#');
+                for (int i = 0; i < height && (y + i) < _height; ++i) {
+                    for (int j = 0; j < width && (x + j) < _width; ++j) {
+                        if (y + i >= 0 && x + j >= 0) {
+                            mvwaddch(_window, y + i, x + j, '#');
                         }
                     }
                 }

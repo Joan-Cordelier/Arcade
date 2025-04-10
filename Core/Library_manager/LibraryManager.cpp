@@ -97,34 +97,45 @@ IDisplay* LibraryManager::loadDisplayLibrary(const std::string& path)
 {
     closeDisplayLibrary();
     
-    loadLibrary(&displayHandle, path);
-    
-    using CreateDisplayFunc = IDisplay* (*)();
-    CreateDisplayFunc createDisplay = reinterpret_cast<CreateDisplayFunc>(dlsym(displayHandle, "createDisplay"));
-    
-    if (createDisplay == nullptr) {
-        closeLibrary(displayHandle);
-        displayHandle = nullptr;
-        throw std::runtime_error("Invalid display library: missing createDisplay function");
-    }
-    
-    display = createDisplay();
-    if (display == nullptr) {
-        closeLibrary(displayHandle);
-        displayHandle = nullptr;
-        throw std::runtime_error("Failed to create display instance");
-    }
-    
-    currentDisplayPath = path;
-    
-    for (size_t i = 0; i < displayLibs.size(); ++i) {
-        if (displayLibs[i] == path) {
-            currentDisplayIndex = i;
-            break;
+    try {
+        loadLibrary(&displayHandle, path);
+        
+        using CreateDisplayFunc = IDisplay* (*)();
+        CreateDisplayFunc createDisplay = reinterpret_cast<CreateDisplayFunc>(dlsym(displayHandle, "createDisplay"));
+        
+        if (createDisplay == nullptr) {
+            std::string error = dlerror();
+            closeLibrary(displayHandle);
+            displayHandle = nullptr;
+            throw std::runtime_error("Invalid display library: " + error);
         }
+        
+        display = createDisplay();
+        if (display == nullptr) {
+            closeLibrary(displayHandle);
+            displayHandle = nullptr;
+            throw std::runtime_error("Failed to create display instance");
+        }
+        
+        currentDisplayPath = path;
+        
+        for (size_t i = 0; i < displayLibs.size(); ++i) {
+            if (displayLibs[i] == path) {
+                currentDisplayIndex = i;
+                break;
+            }
+        }
+        
+        return display;
+    } catch (const std::exception& e) {
+        if (displayHandle != nullptr) {
+            closeLibrary(displayHandle);
+            displayHandle = nullptr;
+        }
+        display = nullptr;
+        std::cerr << "Error loading display library: " << e.what() << std::endl;
+        throw;
     }
-    
-    return display;
 }
 
 IGame* LibraryManager::loadGameLibrary(const std::string& path)
@@ -164,20 +175,37 @@ IGame* LibraryManager::loadGameLibrary(const std::string& path)
 void LibraryManager::closeDisplayLibrary()
 {
     if (display != nullptr) {
-        display->stop();
-        display = nullptr;
+        try {
+            display->stop();
+            
+            usleep(100000);
+            
+            delete display;
+            display = nullptr;
+            
+            usleep(50000);
+        } catch (const std::exception& e) {
+            std::cerr << "Error stopping display: " << e.what() << std::endl;
+        }
     }
     
     if (displayHandle != nullptr) {
         closeLibrary(displayHandle);
         displayHandle = nullptr;
+        
+        usleep(50000);
     }
 }
 
 void LibraryManager::closeGameLibrary()
 {
     if (game != nullptr) {
-        game->stop();
+        try {
+            game->stop();
+        } catch (const std::exception& e) {
+            std::cerr << "Error stopping game: " << e.what() << std::endl;
+        }
+        delete game;
         game = nullptr;
     }
     
@@ -193,6 +221,11 @@ IDisplay* LibraryManager::nextDisplay()
         throw std::runtime_error("No display libraries available");
     
     currentDisplayIndex = (currentDisplayIndex + 1) % displayLibs.size();
+    
+    closeDisplayLibrary();
+        
+    usleep(200000);
+        
     return loadDisplayLibrary(displayLibs[currentDisplayIndex]);
 }
 

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <dlfcn.h>
+#include <unistd.h>
 #include "../Display/IDisplay.hpp"
 #include "../Games/IGame.hpp"
 
@@ -36,6 +37,10 @@ class LibraryManager {
         const std::vector<std::string>& getGameLibs() const { return gameLibs; }
         int getCurrentDisplayIndex() const { return currentDisplayIndex; }
         int getCurrentGameIndex() const { return currentGameIndex; }
+        const std::string& getCurrentDisplayPath() const { return currentDisplayPath; }
+        const std::string& getCurrentGamePath() const { return currentGamePath; }
+        const std::string& getCurrentDisplayName() const { return displayLibs[currentDisplayIndex]; }
+        const std::string& getCurrentGameName() const { return gameLibs[currentGameIndex]; }
 
     private:
         void loadLibrary(void** handle, const std::string& path);

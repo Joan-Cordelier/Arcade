@@ -31,230 +31,119 @@ void MenuManager::removePlayerNameChar()
     }
 }
 
-void MenuManager::selectPreviousItem()
-{
-    switch (currentSection) {
-        case GAMES:
-            if (currentSelection > 0)
-                currentSelection--;
-            break;
-        case GRAPHICS:
-            if (currentSelection > 0)
-                currentSelection--;
-            break;
-        case NAME_INPUT:
-            break;
-    }
-}
-
 void MenuManager::selectNextItem()
 {
     switch (currentSection) {
         case GAMES:
-            if (currentSelection < static_cast<int>(libraryManager->getGameLibs().size()) - 1)
-                currentSelection++;
+            libraryManager->nextGame();
+            currentSelection = libraryManager->getCurrentGameIndex();
             break;
         case GRAPHICS:
-            if (currentSelection < static_cast<int>(libraryManager->getDisplayLibs().size()) - 1)
-                currentSelection++;
+            libraryManager->nextDisplay();
+            currentSelection = libraryManager->getCurrentDisplayIndex();
             break;
         case NAME_INPUT:
             break;
     }
 }
 
-void MenuManager::validateSelection()
-{
-    switch (currentSection) {
-        case GAMES:
-            if (!libraryManager->getGameLibs().empty()) {
-                const auto& gameLibs = libraryManager->getGameLibs();
-                if (currentSelection >= 0 && currentSelection < static_cast<int>(gameLibs.size())) {
-                    libraryManager->loadGameLibrary(gameLibs[currentSelection]);
-                    inMenu = false;
-                }
-            }
-            break;
-        case GRAPHICS:
-            if (!libraryManager->getDisplayLibs().empty()) {
-                const auto& displayLibs = libraryManager->getDisplayLibs();
-                if (currentSelection >= 0 && currentSelection < static_cast<int>(displayLibs.size())) {
-                    libraryManager->loadDisplayLibrary(displayLibs[currentSelection]);
-                }
-            }
-            break;
-        case NAME_INPUT:
-            break;
-    }
-}
-
-void MenuManager::handleMenuInput(const Event& event)
+void MenuManager::update(Event event)
 {
     if (event.type == EventType::KEY_PRESSED) {
         switch (event.key) {
             case Key::UP:
-                selectPreviousItem();
+                currentSection = static_cast<MenuSection>(static_cast<int>(currentSection) - 1);
+                if (currentSection < GAMES)
+                    currentSection = NAME_INPUT;
                 break;
             case Key::DOWN:
-                selectNextItem();
+                currentSection = static_cast<MenuSection>(static_cast<int>(currentSection) + 1);
+                if (currentSection > NAME_INPUT)
+                    currentSection = GAMES;
                 break;
             case Key::LEFT:
-                if (currentSection == GRAPHICS)
-                    currentSection = GAMES;
-                else if (currentSection == NAME_INPUT)
-                    currentSection = GRAPHICS;
-                currentSelection = 0;
-                break;
             case Key::RIGHT:
-                if (currentSection == GAMES)
-                    currentSection = GRAPHICS;
-                else if (currentSection == GRAPHICS)
-                    currentSection = NAME_INPUT;
-                currentSelection = 0;
+                selectNextItem();
                 break;
             case Key::ENTER:
-                validateSelection();
+                if (currentSection == NAME_INPUT || currentSection == GAMES) {
+                    inMenu = false;
+                }
                 break;
             case Key::BACKSPACE:
-                if (currentSection == NAME_INPUT) {
+                if (currentSection == NAME_INPUT)
                     removePlayerNameChar();
-                }
                 break;
             default:
-                if (currentSection == NAME_INPUT && event.key >= Key::A && event.key <= Key::Z) {
-                    char c = 'a' + (static_cast<int>(event.key) - static_cast<int>(Key::A));
-                    addPlayerNameChar(c);
-                }
                 break;
         }
     }
 }
 
-void MenuManager::renderMenu(IDisplay* display, const std::vector<std::string>& displayLibs, 
-                         const std::vector<std::string>& gameLibs, int currentDisplayIndex, 
-                         int currentGameIndex)
+const std::vector<DisplayObject> MenuManager::getDisplayData() const
 {
-    drawText(display, 300, 10, "ARCADE");
-    
-    renderGamesSection(display, gameLibs, currentGameIndex);
-    renderGraphicsSection(display, displayLibs, currentDisplayIndex);
-    renderNameSection(display);
-    renderScoresSection(display);
-    renderControlsSection(display);
-    //TODO: add sections for settings, help, etc.
-    //TODO: maybe had scrolling...
-}
+    std::vector<DisplayObject> displayData;
 
-void MenuManager::renderGamesSection(IDisplay* display, const std::vector<std::string>& gameLibs, int currentGameIndex)
-{
-    drawText(display, 10, 50, "GAMES");
-    drawText(display, 10, 60, "------");
-    
-    const int startY = 80;
-    const int spacing = 15;
-    
-    if (gameLibs.empty()) {
-        drawText(display, 10, startY, "No games available");
-        return;
+    // Draw borders
+    for (int x = 0; x < _width; ++x) {
+        DisplayObject topWall(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        topWall.setScaleX(1);
+        topWall.setScaleY(1);
+        displayData.push_back(topWall);
+
+        DisplayObject bottomWall(x, _height - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        bottomWall.setScaleX(1);
+        bottomWall.setScaleY(1);
+        displayData.push_back(bottomWall);
+    }
+
+    for (int y = 0; y < _height; ++y) {
+        DisplayObject leftWall(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        leftWall.setScaleX(1);
+        leftWall.setScaleY(1);
+        displayData.push_back(leftWall);
+
+        DisplayObject rightWall(_width - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        rightWall.setScaleX(1);
+        rightWall.setScaleY(1);
+        displayData.push_back(rightWall);
     }
     
-    for (size_t i = 0; i < gameLibs.size(); ++i) {
-        std::string gameName = gameLibs[i].substr(6);
-        gameName = gameName.substr(0, gameName.length() - 3);
-        
-        std::string prefix;
-        if (currentSection == GAMES && static_cast<int>(i) == currentSelection)
-            prefix = "> ";
-        else if (static_cast<int>(i) == currentGameIndex)
-            prefix = "* ";
-        else
-            prefix = "  ";
-        
-        drawText(display, 10, startY + i * spacing, prefix + gameName);
-    }
-}
-
-void MenuManager::renderGraphicsSection(IDisplay* display, const std::vector<std::string>& displayLibs, int currentDisplayIndex)
-{
-    drawText(display, 250, 50, "GRAPHICS");
-    drawText(display, 250, 60, "--------");
+    // Draw menu title
+    DisplayObject title(_width / 2 - 8, 5, 16, 2, ObjectType::TEXT, Color(255, 255, 0), "ARCADE MENU");
+    displayData.push_back(title);
     
-    const int startY = 80;
-    const int spacing = 15;
+    // Draw Games section
+    Color gameColor = (currentSection == GAMES) ? Color(0, 255, 0) : Color(255, 255, 255);
+    DisplayObject gamesTitle(5, 10, 10, 1, ObjectType::TEXT, gameColor, "GAMES:");
+    displayData.push_back(gamesTitle);
     
-    if (displayLibs.empty()) {
-        drawText(display, 250, startY, "No display libs available");
-        return;
-    }
+    std::string currentGame = libraryManager->getCurrentGameName();
+    DisplayObject gameValue(20, 10, currentGame.length(), 1, ObjectType::TEXT, gameColor, currentGame);
+    displayData.push_back(gameValue);
     
-    for (size_t i = 0; i < displayLibs.size(); ++i) {
-        std::string libName = displayLibs[i].substr(6);
-        libName = libName.substr(0, libName.length() - 3);
-        
-        std::string prefix;
-        if (currentSection == GRAPHICS && static_cast<int>(i) == currentSelection)
-            prefix = "> ";
-        else if (static_cast<int>(i) == currentDisplayIndex)
-            prefix = "* ";
-        else
-            prefix = "  ";
-        
-        drawText(display, 250, startY + i * spacing, prefix + libName);
-    }
-}
-
-void MenuManager::renderNameSection(IDisplay* display)
-{
-    drawText(display, 450, 50, "PLAYER NAME");
-    drawText(display, 450, 60, "-----------");
+    // Draw Graphics section
+    Color graphicsColor = (currentSection == GRAPHICS) ? Color(0, 255, 0) : Color(255, 255, 255);
+    DisplayObject graphicsTitle(5, 15, 10, 1, ObjectType::TEXT, graphicsColor, "GRAPHICS:");
+    displayData.push_back(graphicsTitle);
     
-    std::string nameField = playerName;
-    if (currentSection == NAME_INPUT)
-        nameField += "_"; //TODO: make it blink with a timer
+    std::string currentDisplay = libraryManager->getCurrentDisplayName();
+    DisplayObject graphicsValue(20, 15, currentDisplay.length(), 1, ObjectType::TEXT, graphicsColor, currentDisplay);
+    displayData.push_back(graphicsValue);
     
-    drawText(display, 450, 80, nameField);
-}
-
-void MenuManager::renderScoresSection(IDisplay* display)
-{
-    drawText(display, 10, 250, "HIGH SCORES");
-    drawText(display, 10, 260, "-----------");
-
-    std::vector<std::pair<std::string, int>> topScores;
+    // Draw Name Input section
+    Color nameColor = (currentSection == NAME_INPUT) ? Color(0, 255, 0) : Color(255, 255, 255);
+    DisplayObject nameTitle(5, 20, 10, 1, ObjectType::TEXT, nameColor, "NAME:");
+    displayData.push_back(nameTitle);
     
-    if (!libraryManager->getGameLibs().empty()) {
-        const auto& gamePath = libraryManager->getGameLibs()[libraryManager->getCurrentGameIndex()];
-        std::string gameName = gamePath.substr(6);
-        gameName = gameName.substr(0, gameName.length() - 3);
-        
-        topScores = scoreManager->getFormattedScores(gameName);
-    }
+    DisplayObject nameValue(20, 20, playerName.length(), 1, ObjectType::TEXT, nameColor, playerName);
+    displayData.push_back(nameValue);
     
-    const int startY = 280;
-    const int spacing = 15; //TODO: change as needed
+    // Instructions
+    DisplayObject instructions(5, 30, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "UP/DOWN: Select section, LEFT/RIGHT: Change option");
+    displayData.push_back(instructions);
+    DisplayObject instructions2(5, 32, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "ENTER: Start with selected options");
+    displayData.push_back(instructions2);
     
-    if (topScores.empty()) {
-        drawText(display, 10, startY, "No scores yet");
-        return;
-    }
-    
-    for (size_t i = 0; i < topScores.size() && i < 5; ++i) {
-        std::string scoreText = topScores[i].first + ": " + std::to_string(topScores[i].second);
-        drawText(display, 10, startY + (i * spacing), scoreText);
-    }
-}
-
-void MenuManager::renderControlsSection(IDisplay* display)
-{
-    const int startY = 400;
-
-    drawText(display, 10, startY, "CONTROLS");
-    drawText(display, 10, startY + 10, "--------");
-    drawText(display, 10, startY + 30, "F1: Next Display");
-    drawText(display, 10, startY + 45, "F2: Next Game");
-    drawText(display, 10, startY + 60, "F3: Restart Game");
-    drawText(display, 10, startY + 75, "F4: Menu");
-    drawText(display, 10, startY + 90, "ESC: Exit");
-    drawText(display, 10, startY + 105, "Arrow keys: Navigate");
-    drawText(display, 10, startY + 120, "Enter: Select");
+    return displayData;
 }

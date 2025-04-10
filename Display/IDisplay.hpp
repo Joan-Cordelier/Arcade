@@ -8,7 +8,7 @@
 #ifndef IDISPLAY_HPP_
 #define IDISPLAY_HPP_
 
-#include "Event.hpp"
+#include "../include/Event.hpp"
 #include "../include/DisplayObject.hpp"
 #include <string>
 #include <vector>

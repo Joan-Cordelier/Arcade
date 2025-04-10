@@ -16,19 +16,29 @@ SfmlDisplay::~SfmlDisplay() {
 
 void SfmlDisplay::init(int width, int height) {
     if (window.isOpen()) {
+        textureCache.clear();
+        window.close();
+    }
+    
+    window.create(sf::VideoMode(width * 32, height * 32), "Arcade - SFML");
+    
+    if (!window.isOpen()) {
+        std::cerr << "Failed to create SFML window!" << std::endl;
         return;
     }
-    window.create(sf::VideoMode(width * 32, height * 32), "Arcade - SFML");
+    
     window.setFramerateLimit(60);
 
     if (!font.loadFromFile("Display/assets/font.ttf")) {
-        std::cerr << "Font not found!\n";
+        std::cerr << "Font not found! " << "Display/assets/font.ttf" << std::endl;
     }
 }
 
 void SfmlDisplay::stop() {
-    if (window.isOpen())
+    if (window.isOpen()) {
+        textureCache.clear();
         window.close();
+    }
 }
 
 Event SfmlDisplay::pollEvent() {
@@ -50,6 +60,12 @@ Event SfmlDisplay::pollEvent() {
                 case sf::Keyboard::Enter: return {EventType::KEY_PRESSED, Key::ENTER, {-1, -1, -1}};
                 case sf::Keyboard::Escape: return {EventType::KEY_PRESSED, Key::ESCAPE, {-1, -1, -1}};
                 case sf::Keyboard::F: return {EventType::KEY_PRESSED, Key::F, {-1, -1, -1}};
+                case sf::Keyboard::F1: return {EventType::KEY_PRESSED, Key::F1, {-1, -1, -1}};
+                case sf::Keyboard::F2: return {EventType::KEY_PRESSED, Key::F2, {-1, -1, -1}};
+                case sf::Keyboard::F3: return {EventType::KEY_PRESSED, Key::F3, {-1, -1, -1}};
+                case sf::Keyboard::F4: return {EventType::KEY_PRESSED, Key::F4, {-1, -1, -1}};
+                case sf::Keyboard::F5: return {EventType::KEY_PRESSED, Key::F5, {-1, -1, -1}};
+                case sf::Keyboard::F6: return {EventType::KEY_PRESSED, Key::F6, {-1, -1, -1}};
                 default: break;
             }
         }

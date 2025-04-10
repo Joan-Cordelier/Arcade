@@ -27,7 +27,7 @@ DISPLAY_TARGETS = $(addprefix $(LIB_DIR)/arcade_, \
 	$(addsuffix .so, $(DISPLAY_LIBS)))
 
 # Game libraries
-GAME_LIBS = menu snake demineur
+GAME_LIBS = snake demineur
 GAME_TARGETS = $(addprefix $(LIB_DIR)/arcade_, $(addsuffix .so, $(GAME_LIBS)))
 
 # Define phony targets
@@ -76,11 +76,6 @@ $(LIB_DIR)/arcade_sdl2.so:
 	@echo "Building SDL2 library: $@"
 	@g++ $(LIBFLAGS) -o $@ $(shell find Display/sdl2 \
 		-name "*.cpp" 2>/dev/null) -lSDL2 -lSDL2_ttf
-
-$(LIB_DIR)/arcade_menu.so:
-	@echo "Building menu library: $@"
-	@g++ $(LIBFLAGS) -o $@ $(shell find Games/menu \
-		-name "*.cpp" 2>/dev/null) -ldl
 
 $(LIB_DIR)/arcade_snake.so:
 	@echo "Building Snake library: $@"

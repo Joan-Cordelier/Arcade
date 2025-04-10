@@ -8,15 +8,33 @@
 #include "SDL2.hpp"
 
 SDL2::SDL2() {
+    _window = nullptr;
+    _renderer = nullptr;
+    _font = nullptr;
+    _running = false;
 }
 
 SDL2::~SDL2() {
-    SDL_Quit();
+    stop();
 }
-
 
 void SDL2::init(int width, int height) 
 {
+    if (_running) {
+        stop();
+    }
+    
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        return;
+    }
+    
+    if (TTF_Init() < 0) {
+        std::cerr << "SDL_ttf could not initialize! TTF_Error: " << TTF_GetError() << std::endl;
+        SDL_Quit();
+        return;
+    }
+    
     _window = SDL_CreateWindow(
         "Window SDL2",
         SDL_WINDOWPOS_CENTERED,
@@ -25,23 +43,59 @@ void SDL2::init(int width, int height)
         height * 1.75,
         SDL_WINDOW_SHOWN
     );
+    
+    if (!_window) {
+        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        TTF_Quit();
+        SDL_Quit();
+        return;
+    }
+    
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
+    if (!_renderer) {
+        std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_DestroyWindow(_window);
+        _window = nullptr;
+        TTF_Quit();
+        SDL_Quit();
+        return;
+    }
+    
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderPresent(_renderer);
     SDL_ShowCursor(SDL_DISABLE);
-    TTF_Init();
+    
     _font = TTF_OpenFont("Display/assets/font.ttf", 20);
     if (!_font) {
-        std::cerr << "Erreur lors de l'ouverture de la police : " << TTF_GetError() << std::endl;
+        std::cerr << "Font could not be loaded! TTF_Error: " << TTF_GetError() << std::endl;
     }
+    
     _running = true;
 }
 
 void SDL2::stop() 
 {
+    if (!_running)
+        return;
+        
     _running = false;
-    SDL_DestroyWindow(_window);
-    SDL_DestroyRenderer(_renderer);
+    
+    if (_font != nullptr) {
+        TTF_CloseFont(_font);
+        _font = nullptr;
+    }
+    
+    if (_renderer != nullptr) {
+        SDL_DestroyRenderer(_renderer);
+        _renderer = nullptr;
+    }
+    
+    if (_window != nullptr) {
+        SDL_DestroyWindow(_window);
+        _window = nullptr;
+    }
+    
+    TTF_Quit();
     SDL_Quit();
 }
 

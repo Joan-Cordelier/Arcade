@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <ncurses.h>
+#include <thread>
+#include <iostream>
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
 #include "../include/Event.hpp"
@@ -30,12 +32,17 @@ class NcurseDisplayer : public IDisplay {
     private:
         bool _running = false;
         int _colorPairCount = 0;
-        std::vector<Color> _colors;  // Added to store created colors
-        WINDOW *_window = nullptr;  // Add window pointer
+        std::vector<Color> _colors;
+        WINDOW *_window = nullptr;
         int _width = 0;
         int _height = 0;
 
         int createColorPair(const Color& color);
+
+        int _scaleX;
+        int _scaleY;
+        int _originalWidth;
+        int _originalHeight;
 };
 
 extern "C" IDisplay *createDisplay();
