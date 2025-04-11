@@ -88,7 +88,7 @@ void Demineur::initGame(int bombs) {
 }
 
 void Demineur::handleInput(Event event) {
-    if (event.type != EventType::KEY_PRESSED)
+    if (event.type != EventType::KEY_PRESSED && event.type != EventType::MOUSE_PRESSED)
         return;
 
     int& x = _cursor.first;
@@ -104,8 +104,17 @@ void Demineur::handleInput(Event event) {
     else if (event.key == Key::F) {
         _board[y * _width + x].isFlagged = !_board[y * _width + x].isFlagged;
     }
-    else if (event.key == Key::SPACE) {
+    else if (event.key == Key::SPACE ) {
         reveal(x, y);
+    }
+    else if (event.mouse.button == 1) {
+        reveal(event.mouse.x, event.mouse.y);
+    }
+    else if (event.mouse.button == 2) {
+        int mousex = event.mouse.x;
+        int mousey = event.mouse.y;
+
+        _board[mousey * _width + mousex].isFlagged = !_board[mousey * _width + mousex].isFlagged;
     }
 }
 
