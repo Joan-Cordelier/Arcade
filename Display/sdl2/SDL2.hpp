@@ -12,6 +12,7 @@
 #include "../IDisplay.hpp"
 #include "../include/DisplayObject.hpp"
 #include "../include/Event.hpp"
+#include <math.h>
 
 
 #ifndef SDL2_HPP_

@@ -63,7 +63,6 @@ void SDL2::init(int width, int height)
     
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderPresent(_renderer);
-    SDL_ShowCursor(SDL_DISABLE);
     
     _font = TTF_OpenFont("Display/assets/font.ttf", 20);
     if (!_font) {
@@ -383,6 +382,24 @@ Event SDL2::pollEvent()
                         {-1, -1, -1}
                     };
             }
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+            int mousex = static_cast<int>(std::floor(event.button.x / 32));
+            int mousey = static_cast<int>(std::floor(event.button.y / 32));
+            return {
+                EventType::MOUSE_PRESSED,
+                Key::NONE,
+                {mousex, mousey, 1}
+            };
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
+            int mousex = static_cast<int>(std::floor(event.button.x / 32));
+            int mousey = static_cast<int>(std::floor(event.button.y / 32));
+            return {
+                EventType::MOUSE_PRESSED,
+                Key::NONE,
+                {mousex, mousey, 2}
+            };
         }
     }
 
