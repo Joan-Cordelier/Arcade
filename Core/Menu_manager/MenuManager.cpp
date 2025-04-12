@@ -11,16 +11,54 @@
 #include <algorithm>
 
 MenuManager::MenuManager(LibraryManager* libManager, ScoreManager* scoreManager)
-    : inMenu(true), currentSection(GAMES), currentSelection(0),
+    : inMenu(true), _nextDisplay(false), currentSection(GAMES), currentSelection(0),
       libraryManager(libManager), scoreManager(scoreManager)
 {
     playerName = "Player";
 }
 
-void MenuManager::addPlayerNameChar(char c)
+void MenuManager::addPlayerNameChar(Key key)
 {
-    if (c >= 32 && c <= 126) {
-        playerName += c;
+    switch (key) {
+        case Key::A: playerName += 'A'; break;
+        case Key::B: playerName += 'B'; break;
+        case Key::C: playerName += 'C'; break;
+        case Key::D: playerName += 'D'; break;
+        case Key::E: playerName += 'E'; break;
+        case Key::F: playerName += 'F'; break;
+        case Key::G: playerName += 'G'; break;
+        case Key::H: playerName += 'H'; break;
+        case Key::I: playerName += 'I'; break;
+        case Key::J: playerName += 'J'; break;
+        case Key::K: playerName += 'K'; break;
+        case Key::L: playerName += 'L'; break;
+        case Key::M: playerName += 'M'; break;
+        case Key::N: playerName += 'N'; break;
+        case Key::O: playerName += 'O'; break;
+        case Key::P: playerName += 'P'; break;
+        case Key::Q: playerName += 'Q'; break;
+        case Key::R: playerName += 'R'; break;
+        case Key::S: playerName += 'S'; break;
+        case Key::T: playerName += 'T'; break;
+        case Key::U: playerName += 'U'; break;
+        case Key::V: playerName += 'V'; break;
+        case Key::W: playerName += 'W'; break;
+        case Key::X: playerName += 'X'; break;
+        case Key::Y: playerName += 'Y'; break;
+        case Key::Z: playerName += 'Z'; break;
+        case Key::SPACE: playerName += ' '; break;
+        case Key::NUM0: playerName += '0'; break;
+        case Key::NUM1: playerName += '1'; break;
+        case Key::NUM2: playerName += '2'; break;
+        case Key::NUM3: playerName += '3'; break;
+        case Key::NUM4: playerName += '4'; break;
+        case Key::NUM5: playerName += '5'; break;
+        case Key::NUM6: playerName += '6'; break;
+        case Key::NUM7: playerName += '7'; break;
+        case Key::NUM8: playerName += '8'; break;
+        case Key::NUM9: playerName += '9'; break;
+        default:
+            break;
     }
 }
 
@@ -39,8 +77,8 @@ void MenuManager::selectNextItem()
             currentSelection = libraryManager->getCurrentGameIndex();
             break;
         case GRAPHICS:
-            libraryManager->nextDisplay();
             currentSelection = libraryManager->getCurrentDisplayIndex();
+            _nextDisplay = true;
             break;
         case NAME_INPUT:
             break;
@@ -75,6 +113,9 @@ void MenuManager::update(Event event)
                     removePlayerNameChar();
                 break;
             default:
+                if (currentSection == NAME_INPUT) {
+                    addPlayerNameChar(event.key);
+                }
                 break;
         }
     }

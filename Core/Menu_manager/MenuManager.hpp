@@ -34,7 +34,7 @@ class MenuManager {
         // Player
         const std::string& getPlayerName() const { return playerName; }
         void setPlayerName(const std::string& name) { playerName = name; }
-        void addPlayerNameChar(char c);
+        void addPlayerNameChar(Key key);
         void removePlayerNameChar();
 
         // Navigation
@@ -47,9 +47,12 @@ class MenuManager {
         // Menu selection info
         MenuSection getCurrentSection() const { return currentSection; }
         int getCurrentSelection() const { return currentSelection; }
+        bool getNextDisplay() const { return _nextDisplay; }
+        void setNextDisplay(bool nextDisplay) { _nextDisplay = nextDisplay; }
 
     private:
         bool inMenu;
+        bool _nextDisplay;
         MenuSection currentSection;
         int currentSelection;
         int _width = 80;

@@ -82,7 +82,11 @@ void Core::run()
 
             if (menuManager->isInMenu()) {
                 menuManager->update(event);
-                
+                if (menuManager->getNextDisplay()) {
+                    nextDisplay();
+                    menuManager->setNextDisplay(false);
+                }
+
                 if (!menuManager->isInMenu()) {
                     try {
                         game = libraryManager->loadGameLibrary(

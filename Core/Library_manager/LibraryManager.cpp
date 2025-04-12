@@ -221,9 +221,7 @@ IDisplay* LibraryManager::nextDisplay()
         throw std::runtime_error("No display libraries available");
     
     currentDisplayIndex = (currentDisplayIndex + 1) % displayLibs.size();
-    
-    closeDisplayLibrary();
-        
+
     usleep(200000);
         
     return loadDisplayLibrary(displayLibs[currentDisplayIndex]);
