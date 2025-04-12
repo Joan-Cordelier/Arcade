@@ -12,6 +12,7 @@
 #include "../include/Event.hpp"
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
+#include <math.h>
 
 class SfmlDisplay : public IDisplay {
     public:

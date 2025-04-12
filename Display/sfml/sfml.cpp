@@ -101,6 +101,14 @@ Event SfmlDisplay::pollEvent() {
                 default: break;
             }
         }
+        if (event.type == sf::Event::MouseButtonPressed) {
+            int mousex = static_cast<int>(std::floor(event.mouseButton.x / 32));
+            int mousey = static_cast<int>(std::floor(event.mouseButton.y / 32));
+            if (event.mouseButton.button == sf::Mouse::Right)
+                return {EventType::MOUSE_PRESSED, Key::NONE, {mousex, mousey, 2}};
+            if (event.mouseButton.button == sf::Mouse::Left)
+                return {EventType::MOUSE_PRESSED, Key::NONE, {mousex, mousey, 1}};
+        }
     }
     return {
         EventType::NONE,
