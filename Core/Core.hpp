@@ -40,6 +40,7 @@ class Core {
         std::unique_ptr<ScoreManager> scoreManager;
 
         bool isRunning;
+        bool pauseMenuRendered;
 
         IDisplay* display;
         IGame* game;

@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 Core::Core(const std::string& initialLibrary) 
-    : isRunning(false), display(nullptr), game(nullptr)
+    : isRunning(false), pauseMenuRendered(false), display(nullptr), game(nullptr)
 {
     try {
         libraryManager = std::make_unique<LibraryManager>();
@@ -62,22 +62,46 @@ void Core::run()
         while (isRunning) {
             Event event = display->pollEvent();
 
-            if (event.type == EventType::KEY_PRESSED && event.key == Key::ESCAPE) {
-                if (menuManager->isInMenu())
-                    isRunning = false;
-                else
-                    menuManager->setMenuState(true);
-                continue;
-            }
-
-            if (event.type == EventType::KEY_PRESSED && event.key == Key::F1) {
-                nextDisplay();
-                continue;
-            }
-
-            if (event.type == EventType::KEY_PRESSED && event.key == Key::F2) {
-                nextGame();
-                continue;
+            if (event.type == EventType::KEY_PRESSED) {
+                switch (event.key) {
+                    case Key::Q:
+                        isRunning = false;
+                        continue;
+                    case Key::ESCAPE:
+                        if (menuManager->isInMenu())
+                            isRunning = false;
+                        else if (menuManager->isInPauseMenu()) {
+                            menuManager->setPauseMenuState(false);
+                            goToMenu();
+                        } else
+                            goToMenu();
+                        continue;
+                    case Key::F1:
+                        nextDisplay();
+                        continue;
+                    case Key::F3:
+                        if (!menuManager->isInMenu()) {
+                            nextGame();
+                        }
+                        continue;
+                    case Key::R:
+                        if (!menuManager->isInMenu()) {
+                            if (menuManager->isInPauseMenu()) {
+                                menuManager->setPauseMenuState(false);
+                                pauseMenuRendered = false;
+                            }
+                            restartGame();
+                        }
+                        continue;
+                    case Key::P:
+                        if (!menuManager->isInMenu()) {
+                            menuManager->togglePauseMenu();
+                            pauseMenuRendered = false;
+                        }
+                        continue;
+                    default:
+                        break;
+                }
             }
 
             if (menuManager->isInMenu()) {
@@ -96,7 +120,7 @@ void Core::run()
                         menuManager->setMenuState(true);
                     }
                 }
-            } else if (game != nullptr) {
+            } else if (game != nullptr && !menuManager->isInPauseMenu()) {
                 game->update(event);
             }
 
@@ -119,15 +143,24 @@ void Core::update()
     if (menuManager->isInMenu()) {
         auto menuObjects = menuManager->getDisplayData();
         display->display(menuObjects);
-    } else if (game != nullptr) {
-        auto objects = game->getDisplayData();
-        std::string scoreText = "Score: " + std::to_string(game->getScore());
-        DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
-        scoreDisplay.setScaleX(1.0f);
-        scoreDisplay.setScaleY(1.0f);
-        objects.push_back(scoreDisplay);
+    } else {
+        if (game != nullptr && !pauseMenuRendered) {
+            auto objects = game->getDisplayData();
+            std::string scoreText = "Score: " + std::to_string(game->getScore());
+            DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
+            scoreDisplay.setScaleX(1.0f);
+            scoreDisplay.setScaleY(1.0f);
+            objects.push_back(scoreDisplay);
 
-        display->display(objects);
+            display->display(objects);
+
+            // Display pause menu overlay only once if paused
+            if (menuManager->isInPauseMenu()) {
+                auto pauseMenuObjects = menuManager->getPauseMenuDisplayData();
+                display->display(pauseMenuObjects);
+                pauseMenuRendered = true;
+            }
+        }
     }
 }
 
@@ -158,12 +191,20 @@ void Core::nextGame()
 void Core::restartGame()
 {
     if (game != nullptr) {
+        if (menuManager->isInPauseMenu()) {
+            menuManager->setPauseMenuState(false);
+            pauseMenuRendered = false; // Reset pause menu rendered flag
+        }
         game->reset();
     }
 }
 
 void Core::goToMenu()
 {
+    if (menuManager->isInPauseMenu()) {
+        menuManager->setPauseMenuState(false);
+        pauseMenuRendered = false; // Reset pause menu rendered flag
+    }
     menuManager->setMenuState(true);
 }
 
@@ -193,4 +234,6 @@ void Core::exitGame()
     if (scoreManager != nullptr) {
         scoreManager->saveScores();
     }
+
+    pauseMenuRendered = false;
 }

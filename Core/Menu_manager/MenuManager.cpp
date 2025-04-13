@@ -11,7 +11,7 @@
 #include <algorithm>
 
 MenuManager::MenuManager(LibraryManager* libManager, ScoreManager* scoreManager)
-    : inMenu(true), _nextDisplay(false), currentSection(GAMES), currentSelection(0),
+    : inMenu(true), inPauseMenu(false), _nextDisplay(false), currentSection(GAMES), currentSelection(0),
       libraryManager(libManager), scoreManager(scoreManager)
 {
     playerName = "Player";
@@ -125,66 +125,120 @@ const std::vector<DisplayObject> MenuManager::getDisplayData() const
 {
     std::vector<DisplayObject> displayData;
 
-    // Draw borders
-    for (int x = 0; x < _width; ++x) {
+    // Draw borders - fix bottom and right walls to ensure they're visible
+    int borderWidth = _width;
+    int borderHeight = _height;
+    
+    // Draw top and bottom borders
+    for (int x = 0; x < borderWidth; ++x) {
         DisplayObject topWall(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
-        topWall.setScaleX(1);
-        topWall.setScaleY(1);
         displayData.push_back(topWall);
 
-        DisplayObject bottomWall(x, _height - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
-        bottomWall.setScaleX(1);
-        bottomWall.setScaleY(1);
+        DisplayObject bottomWall(x, borderHeight - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
         displayData.push_back(bottomWall);
     }
 
-    for (int y = 0; y < _height; ++y) {
+    // Draw left and right borders
+    for (int y = 0; y < borderHeight; ++y) {
         DisplayObject leftWall(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
-        leftWall.setScaleX(1);
-        leftWall.setScaleY(1);
         displayData.push_back(leftWall);
 
-        DisplayObject rightWall(_width - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
-        rightWall.setScaleX(1);
-        rightWall.setScaleY(1);
+        DisplayObject rightWall(borderWidth - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
         displayData.push_back(rightWall);
     }
     
+    // Adjusted positions for menu elements to ensure they stay within borders
+    int menuCenterX = borderWidth / 2;
+    // int menuWidth = borderWidth - 4;  // Keep elements away from borders
+    int menuItemLeftMargin = 5;
+    int menuItemRightMargin = menuItemLeftMargin + 15;
+    
     // Draw menu title
-    DisplayObject title(_width / 2 - 8, 5, 16, 2, ObjectType::TEXT, Color(255, 255, 0), "ARCADE MENU");
+    std::string titleText = "ARCADE MENU";
+    DisplayObject title(menuCenterX - titleText.length()/2, 5, titleText.length(), 2, ObjectType::TEXT, Color(255, 255, 0), titleText);
     displayData.push_back(title);
     
     // Draw Games section
     Color gameColor = (currentSection == GAMES) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject gamesTitle(5, 10, 10, 1, ObjectType::TEXT, gameColor, "GAMES:");
+    DisplayObject gamesTitle(menuItemLeftMargin, 10, 10, 1, ObjectType::TEXT, gameColor, "GAMES:");
     displayData.push_back(gamesTitle);
     
     std::string currentGame = libraryManager->getCurrentGameName();
-    DisplayObject gameValue(20, 10, currentGame.length(), 1, ObjectType::TEXT, gameColor, currentGame);
+    DisplayObject gameValue(menuItemRightMargin, 10, currentGame.length(), 1, ObjectType::TEXT, gameColor, currentGame);
     displayData.push_back(gameValue);
     
     // Draw Graphics section
     Color graphicsColor = (currentSection == GRAPHICS) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject graphicsTitle(5, 15, 10, 1, ObjectType::TEXT, graphicsColor, "GRAPHICS:");
+    DisplayObject graphicsTitle(menuItemLeftMargin, 15, 10, 1, ObjectType::TEXT, graphicsColor, "GRAPHICS:");
     displayData.push_back(graphicsTitle);
     
     std::string currentDisplay = libraryManager->getCurrentDisplayName();
-    DisplayObject graphicsValue(20, 15, currentDisplay.length(), 1, ObjectType::TEXT, graphicsColor, currentDisplay);
+    DisplayObject graphicsValue(menuItemRightMargin, 15, currentDisplay.length(), 1, ObjectType::TEXT, graphicsColor, currentDisplay);
     displayData.push_back(graphicsValue);
     
     // Draw Name Input section
     Color nameColor = (currentSection == NAME_INPUT) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject nameTitle(5, 20, 10, 1, ObjectType::TEXT, nameColor, "NAME:");
+    DisplayObject nameTitle(menuItemLeftMargin, 20, 10, 1, ObjectType::TEXT, nameColor, "NAME:");
     displayData.push_back(nameTitle);
     
-    DisplayObject nameValue(20, 20, playerName.length(), 1, ObjectType::TEXT, nameColor, playerName);
+    DisplayObject nameValue(menuItemRightMargin, 20, playerName.length(), 1, ObjectType::TEXT, nameColor, playerName);
     displayData.push_back(nameValue);
     
     // Instructions
-    DisplayObject instructions(5, 30, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "UP/DOWN: Select section, LEFT/RIGHT: Change option");
+    DisplayObject instructions(menuItemLeftMargin, 25, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "UP/DOWN: Select section, LEFT/RIGHT: Change option");
     displayData.push_back(instructions);
-    DisplayObject instructions2(5, 32, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "ENTER: Start with selected options");
+    DisplayObject instructions2(menuItemLeftMargin, 27, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "ENTER: Start with selected options");
     displayData.push_back(instructions2);
+    
+    return displayData;
+}
+
+const std::vector<DisplayObject> MenuManager::getPauseMenuDisplayData() const
+{
+    std::vector<DisplayObject> displayData;
+
+    // Semi-transparent background
+    DisplayObject background(0, 0, _width, _height, ObjectType::RECTANGLE, Color(0, 0, 0, 128), " ");
+    displayData.push_back(background);
+    
+    // Draw borders of pause menu window
+    int windowWidth = 40;
+    int windowHeight = 20;
+    int startX = (_width - windowWidth) / 2;
+    int startY = (_height - windowHeight) / 2;
+    
+    for (int x = 0; x < windowWidth; ++x) {
+        DisplayObject topWall(startX + x, startY, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "-");
+        displayData.push_back(topWall);
+
+        DisplayObject bottomWall(startX + x, startY + windowHeight - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "-");
+        displayData.push_back(bottomWall);
+    }
+
+    for (int y = 0; y < windowHeight; ++y) {
+        DisplayObject leftWall(startX, startY + y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "|");
+        displayData.push_back(leftWall);
+
+        DisplayObject rightWall(startX + windowWidth - 1, startY + y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "|");
+        displayData.push_back(rightWall);
+    }
+    
+    // Draw pause title
+    DisplayObject title(startX + windowWidth / 2 - 6, startY + 3, 12, 2, ObjectType::TEXT, Color(255, 255, 0), "GAME PAUSED");
+    displayData.push_back(title);
+    
+    // Draw instructions
+    DisplayObject resumeInstr(startX + 5, startY + 8, 30, 1, ObjectType::TEXT, Color(255, 255, 255), "P: Resume Game");
+    displayData.push_back(resumeInstr);
+    
+    DisplayObject restartInstr(startX + 5, startY + 10, 30, 1, ObjectType::TEXT, Color(255, 255, 255), "R: Restart Game");
+    displayData.push_back(restartInstr);
+    
+    DisplayObject menuInstr(startX + 5, startY + 12, 30, 1, ObjectType::TEXT, Color(255, 255, 255), "ESC: Return to Main Menu");
+    displayData.push_back(menuInstr);
+    
+    DisplayObject quitInstr(startX + 5, startY + 14, 30, 1, ObjectType::TEXT, Color(255, 255, 255), "Q: Quit Arcade");
+    displayData.push_back(quitInstr);
     
     return displayData;
 }

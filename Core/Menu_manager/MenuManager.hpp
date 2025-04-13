@@ -31,6 +31,11 @@ class MenuManager {
         bool isInMenu() const { return inMenu; }
         void setMenuState(bool state) { inMenu = state; }
 
+        // Pause state
+        bool isInPauseMenu() const { return inPauseMenu; }
+        void setPauseMenuState(bool state) { inPauseMenu = state; }
+        void togglePauseMenu() { inPauseMenu = !inPauseMenu; }
+        
         // Player
         const std::string& getPlayerName() const { return playerName; }
         void setPlayerName(const std::string& name) { playerName = name; }
@@ -43,6 +48,7 @@ class MenuManager {
         // Menu display
         void update(Event event);
         const std::vector<DisplayObject> getDisplayData() const;
+        const std::vector<DisplayObject> getPauseMenuDisplayData() const;
 
         // Menu selection info
         MenuSection getCurrentSection() const { return currentSection; }
@@ -52,11 +58,12 @@ class MenuManager {
 
     private:
         bool inMenu;
+        bool inPauseMenu;
         bool _nextDisplay;
         MenuSection currentSection;
         int currentSelection;
-        int _width = 80;
-        int _height = 40;
+        int _width = 60;
+        int _height = 30;
         
         // Player
         std::string playerName;
