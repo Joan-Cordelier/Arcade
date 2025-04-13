@@ -132,19 +132,19 @@ const std::vector<DisplayObject> MenuManager::getDisplayData() const
     
     // Draw top and bottom borders
     for (int x = 0; x < borderWidth; ++x) {
-        DisplayObject topWall(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        DisplayObject topWall(x, 0, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "-");
         displayData.push_back(topWall);
 
-        DisplayObject bottomWall(x, borderHeight - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        DisplayObject bottomWall(x, borderHeight - 1, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "-");
         displayData.push_back(bottomWall);
     }
 
     // Draw left and right borders
     for (int y = 0; y < borderHeight; ++y) {
-        DisplayObject leftWall(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        DisplayObject leftWall(0, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "|");
         displayData.push_back(leftWall);
 
-        DisplayObject rightWall(borderWidth - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "#");
+        DisplayObject rightWall(borderWidth - 1, y, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 255), "|");
         displayData.push_back(rightWall);
     }
     

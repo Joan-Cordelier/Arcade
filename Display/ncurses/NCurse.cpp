@@ -506,8 +506,8 @@ void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
 
             wattron(_window, COLOR_PAIR(colorPair));
 
+            std::string text = obj.getText();
             if (obj.getType() == ObjectType::TEXT) {
-                std::string text = obj.getText();
                 if (!text.empty()) {
                     if (y >= 0 && y < _height && x >= 0 && x < _width) {
                         mvwprintw(_window, y, x, "%s", text.c_str());
@@ -517,7 +517,11 @@ void NcurseDisplayer::display(const std::vector<DisplayObject>& objects)
                 for (int i = 0; i < height && (y + i) < _height; ++i) {
                     for (int j = 0; j < width && (x + j) < _width; ++j) {
                         if (y + i >= 0 && x + j >= 0) {
-                            mvwaddch(_window, y + i, x + j, '#');
+                            if (text.empty()) {
+                                mvwaddch(_window, y + i, x + j, '#');
+                            } else {
+                                mvwaddch(_window, y + i, x + j, text[0]);
+                            }
                         }
                     }
                 }

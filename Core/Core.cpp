@@ -124,7 +124,8 @@ void Core::run()
                 game->update(event);
             }
 
-            update();
+            if (!pauseMenuRendered)
+                update();
         }
     } catch (const std::exception& e) {
         std::cerr << "Exception in Core::run: " << e.what() << std::endl;
