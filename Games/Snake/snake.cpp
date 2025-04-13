@@ -129,11 +129,19 @@ const std::vector<DisplayObject> Snake::getDisplayData() const {
     }
 
     // Serpent
-    for (const auto& part : _snake) {
-        DisplayObject body(part.first, part.second, 1, 1, ObjectType::RECTANGLE, Color(0, 255, 0), "@");
-        body.setScaleX(SCALE);
-        body.setScaleY(SCALE);
-        data.push_back(body);
+    for (size_t i = 0; i < _snake.size(); ++i) {
+        const auto& part = _snake[i];
+        if (i == 0) {
+            DisplayObject head(part.first, part.second, 1, 1, ObjectType::RECTANGLE, Color(255, 255, 0), "O");
+            head.setScaleX(SCALE);
+            head.setScaleY(SCALE);
+            data.push_back(head);
+        } else {
+            DisplayObject body(part.first, part.second, 1, 1, ObjectType::RECTANGLE, Color(0, 255, 0), "@");
+            body.setScaleX(SCALE);
+            body.setScaleY(SCALE);
+            data.push_back(body);
+        }
     }
 
     // Nourriture
