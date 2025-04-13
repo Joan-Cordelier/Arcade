@@ -65,8 +65,11 @@ void Core::run()
             if (event.type == EventType::KEY_PRESSED) {
                 switch (event.key) {
                     case Key::Q:
-                        isRunning = false;
-                        continue;
+                        if (!menuManager->isInMenu()) {
+                            isRunning = false;
+                            continue;
+                        }
+                        break;
                     case Key::ESCAPE:
                         if (menuManager->isInMenu())
                             isRunning = false;
@@ -98,7 +101,6 @@ void Core::run()
                             menuManager->togglePauseMenu();
                             pauseMenuRendered = false;
                         }
-                        continue;
                     default:
                         break;
                 }
