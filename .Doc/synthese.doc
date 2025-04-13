@@ -1,0 +1,123 @@
+Arcade - Documentation Technique
+
+1. Introduction
+
+Ce document a pour but décrire le fonctionnement technique du projet Arcade, réalisé dans le cadre du module de programmation orientée objet à EPITECH. L'objectif principal du projet est de concevoir une architecture modulaire permettant de charger dynamiquement des jeux et des bibliothèques graphiques.
+
+2. Architecture du Projet
+
+2.1 Structure Générale
+
+Le projet est composé de plusieurs composants clés :
+
+arcade : le binaire principal qui charge dynamiquement les jeux et les bibliothèques graphiques
+
+lib/ : contient les bibliothèques dynamiques .so des jeux et des affichages
+
+Games/ : contient les jeux comme Snake et Minesweeper
+
+Display/ : contient les bibliothèques graphiques comme SFML, Ncurses, SDL2
+
+include/ : contient les interfaces communes (IGame, IDisplay, etc.)
+
+2.2 Interfaces
+
+IGame
+
+Interface que chaque jeu doit implémenter. Contient les méthodes :
+
+reset()
+
+update(Event)
+
+getDisplayData()
+
+getScore()
+
+stop()
+
+IDisplay
+
+Interface que chaque affichage doit implémenter. Contient les méthodes :
+
+init(width, height)
+
+pollEvent()
+
+clear()
+
+display(std::vector<DisplayObject>)
+
+stop()
+
+2.3 Chargement Dynamique
+
+Le chargement dynamique est effectué à l'aide de dlopen, dlsym et dlclose (bibliothèque dlfcn). Les bibliothèques doivent exposer une fonction createGame ou createDisplay avec extern "C".
+
+3. Fonctionnement du Cœur (Core.cpp)
+
+Le cœur du programme (Core) est responsable de :
+
+Charger la bibliothèque graphique de départ
+
+Afficher le menu
+
+Charger un jeu au choix
+
+Gérer les entrées clavier
+
+Appeler les méthodes update et getDisplayData du jeu ou du menu
+
+4. Jeux Implémentés
+
+4.1 Snake
+
+Jeu classique du serpent
+
+Le serpent se déplace avec les flèches
+
+La nourriture apparaît aléatoirement, en évitant le corps du serpent et les murs
+
+Collision avec le mur ou soi-même = Game Over
+
+4.2 Minesweeper
+
+Sélection de la difficulté en menu (20, 50, 100 bombes)
+
+Premier clic toujours safe (aucune bombe dans la zone 3x3)
+
+Cascade de révélation si 0 bombe autour
+
+Affichage des bombes en cas de défaite
+
+5. Affichages Implémentés
+
+SFML (texte et rectangles pour les jeux)
+
+SDL2 et Ncurses sont présents mais non détaillés ici
+
+6. Compilation
+
+La compilation se fait via make. Les bibliothèques sont compilées dans le dossier lib/ sous la forme lib/arcade_XXX.so. Exemple :
+
+make re
+./arcade lib/arcade_sfml.so
+
+7. Assets
+
+Les polices sont chargées depuis assets/font.ttf. Si le fichier est absent, un message d'erreur s'affiche.
+
+8. Améliorations Possibles
+
+Ajout d'autres jeux
+
+Gestion de la souris plus avancée
+
+Système de highscores persistants
+
+Plus de thématisation graphique
+
+9. Conclusion
+
+Le projet respecte les spécifications demandées : modularité, interface commune, chargement dynamique, au moins 2 jeux et 3 bibliothèques graphiques. La navigation est possible au clavier et les jeux sont jouables sans crash. Le code est clair, extensible et bien structuré.
+
