@@ -146,6 +146,13 @@ void Core::update()
     } else {
         if (game != nullptr && !pauseMenuRendered) {
             auto objects = game->getDisplayData();
+            
+            std::string playerNameText = "Player: " + menuManager->getPlayerName();
+            DisplayObject playerNameDisplay(40, 8, playerNameText.length(), 2, ObjectType::TEXT, Color(255, 255, 255), playerNameText);
+            playerNameDisplay.setScaleX(1.0f);
+            playerNameDisplay.setScaleY(1.0f);
+            objects.push_back(playerNameDisplay);
+            
             std::string scoreText = "Score: " + std::to_string(game->getScore());
             DisplayObject scoreDisplay(40, 10, 10, 2, ObjectType::TEXT, Color(255, 255, 0), scoreText);
             scoreDisplay.setScaleX(1.0f);
@@ -154,7 +161,6 @@ void Core::update()
 
             display->display(objects);
 
-            // Display pause menu overlay only once if paused
             if (menuManager->isInPauseMenu()) {
                 auto pauseMenuObjects = menuManager->getPauseMenuDisplayData();
                 display->display(pauseMenuObjects);
@@ -166,6 +172,8 @@ void Core::update()
 
 void Core::nextDisplay()
 {
+    pauseMenuRendered = false;
+
     try {
         display = libraryManager->nextDisplay();
         if (display != nullptr) {
@@ -178,6 +186,8 @@ void Core::nextDisplay()
 
 void Core::nextGame()
 {
+    saveCurrentScore();
+    
     try {
         game = libraryManager->nextGame();
         if (game != nullptr) {
@@ -190,10 +200,12 @@ void Core::nextGame()
 
 void Core::restartGame()
 {
+    saveCurrentScore();
+
     if (game != nullptr) {
         if (menuManager->isInPauseMenu()) {
             menuManager->setPauseMenuState(false);
-            pauseMenuRendered = false; // Reset pause menu rendered flag
+            pauseMenuRendered = false;
         }
         game->reset();
     }
@@ -201,16 +213,34 @@ void Core::restartGame()
 
 void Core::goToMenu()
 {
+    saveCurrentScore();
+    
     if (menuManager->isInPauseMenu()) {
         menuManager->setPauseMenuState(false);
-        pauseMenuRendered = false; // Reset pause menu rendered flag
+        pauseMenuRendered = false;
     }
     menuManager->setMenuState(true);
+}
+
+void Core::saveCurrentScore()
+{
+    if (game != nullptr && !menuManager->isInMenu()) {
+        int currentScore = game->getScore();
+        std::string playerName = menuManager->getPlayerName();
+        std::string gameName = libraryManager->getCurrentGameName();
+        
+        if (currentScore > 0 && !playerName.empty() && !gameName.empty()) {
+            scoreManager->addScore(playerName, gameName, currentScore);
+        }
+    }
 }
 
 void Core::exitGame()
 {
     isRunning = false;
+    
+    // Save score before exiting
+    saveCurrentScore();
     
     if (game != nullptr) {
         game->stop();

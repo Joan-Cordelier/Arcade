@@ -80,6 +80,8 @@ void MenuManager::selectNextItem()
             currentSelection = libraryManager->getCurrentDisplayIndex();
             _nextDisplay = true;
             break;
+        case SCORES:
+            break;
         case NAME_INPUT:
             break;
     }
@@ -125,7 +127,6 @@ const std::vector<DisplayObject> MenuManager::getDisplayData() const
 {
     std::vector<DisplayObject> displayData;
 
-    // Draw borders - fix bottom and right walls to ensure they're visible
     int borderWidth = _width;
     int borderHeight = _height;
     
@@ -147,9 +148,7 @@ const std::vector<DisplayObject> MenuManager::getDisplayData() const
         displayData.push_back(rightWall);
     }
     
-    // Adjusted positions for menu elements to ensure they stay within borders
     int menuCenterX = borderWidth / 2;
-    // int menuWidth = borderWidth - 4;  // Keep elements away from borders
     int menuItemLeftMargin = 5;
     int menuItemRightMargin = menuItemLeftMargin + 15;
     
@@ -160,37 +159,111 @@ const std::vector<DisplayObject> MenuManager::getDisplayData() const
     
     // Draw Games section
     Color gameColor = (currentSection == GAMES) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject gamesTitle(menuItemLeftMargin, 10, 10, 1, ObjectType::TEXT, gameColor, "GAMES:");
+    DisplayObject gamesTitle(menuItemLeftMargin, 8, 10, 1, ObjectType::TEXT, gameColor, "GAMES:");
     displayData.push_back(gamesTitle);
     
     std::string currentGame = libraryManager->getCurrentGameName();
-    DisplayObject gameValue(menuItemRightMargin, 10, currentGame.length(), 1, ObjectType::TEXT, gameColor, currentGame);
+    DisplayObject gameValue(menuItemRightMargin, 8, currentGame.length(), 1, ObjectType::TEXT, gameColor, currentGame);
     displayData.push_back(gameValue);
     
     // Draw Graphics section
     Color graphicsColor = (currentSection == GRAPHICS) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject graphicsTitle(menuItemLeftMargin, 15, 10, 1, ObjectType::TEXT, graphicsColor, "GRAPHICS:");
+    DisplayObject graphicsTitle(menuItemLeftMargin, 12, 10, 1, ObjectType::TEXT, graphicsColor, "GRAPHICS:");
     displayData.push_back(graphicsTitle);
     
     std::string currentDisplay = libraryManager->getCurrentDisplayName();
-    DisplayObject graphicsValue(menuItemRightMargin, 15, currentDisplay.length(), 1, ObjectType::TEXT, graphicsColor, currentDisplay);
+    DisplayObject graphicsValue(menuItemRightMargin, 12, currentDisplay.length(), 1, ObjectType::TEXT, graphicsColor, currentDisplay);
     displayData.push_back(graphicsValue);
+    
+    // Draw Scores section
+    Color scoresColor = (currentSection == SCORES) ? Color(0, 255, 0) : Color(255, 255, 255);
+    DisplayObject scoresTitle(menuItemLeftMargin, 16, 10, 1, ObjectType::TEXT, scoresColor, "SCORES:");
+    displayData.push_back(scoresTitle);
+    
+    // Add score items
+    if (currentSection == SCORES) {
+        std::vector<DisplayObject> scoreObjects = getScoreDisplay(menuItemRightMargin, 16);
+        displayData.insert(displayData.end(), scoreObjects.begin(), scoreObjects.end());
+    } else {
+        std::string currentGame = libraryManager->getCurrentGameName();
+        if (!currentGame.empty()) {
+            DisplayObject viewScoresPrompt(menuItemRightMargin, 16, 25, 1, ObjectType::TEXT, scoresColor, "<Select to view scores>");
+            displayData.push_back(viewScoresPrompt);
+        }
+    }
     
     // Draw Name Input section
     Color nameColor = (currentSection == NAME_INPUT) ? Color(0, 255, 0) : Color(255, 255, 255);
-    DisplayObject nameTitle(menuItemLeftMargin, 20, 10, 1, ObjectType::TEXT, nameColor, "NAME:");
+    DisplayObject nameTitle(menuItemLeftMargin, 24, 10, 1, ObjectType::TEXT, nameColor, "NAME:");
     displayData.push_back(nameTitle);
     
-    DisplayObject nameValue(menuItemRightMargin, 20, playerName.length(), 1, ObjectType::TEXT, nameColor, playerName);
+    DisplayObject nameValue(menuItemRightMargin, 24, playerName.length(), 1, ObjectType::TEXT, nameColor, playerName);
     displayData.push_back(nameValue);
     
     // Instructions
-    DisplayObject instructions(menuItemLeftMargin, 25, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "UP/DOWN: Select section, LEFT/RIGHT: Change option");
+    DisplayObject instructions(menuItemLeftMargin, 26, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "UP/DOWN: Select section, LEFT/RIGHT: Change option");
     displayData.push_back(instructions);
-    DisplayObject instructions2(menuItemLeftMargin, 27, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "ENTER: Start with selected options");
+    DisplayObject instructions2(menuItemLeftMargin, 28, 40, 1, ObjectType::TEXT, Color(150, 150, 150), "ENTER: Start with selected options");
     displayData.push_back(instructions2);
     
     return displayData;
+}
+
+std::vector<DisplayObject> MenuManager::getScoreDisplay(int startX, int startY) const 
+{
+    std::vector<DisplayObject> scoreObjects;
+    
+    std::string currentGame = libraryManager->getCurrentGameName();
+    if (currentGame.empty()) return scoreObjects;
+    
+    auto formattedScores = scoreManager->getFormattedScores(currentGame);
+    
+    // Display the game name as header
+    DisplayObject gameHeader(startX, startY, currentGame.length(), 1, ObjectType::TEXT, Color(255, 255, 0), currentGame);
+    scoreObjects.push_back(gameHeader);
+    
+    // Display top scores
+    int yOffset = 2;
+    if (formattedScores.empty()) {
+        DisplayObject noScores(startX, startY + yOffset, 15, 1, ObjectType::TEXT, Color(255, 255, 255), "No scores yet");
+        scoreObjects.push_back(noScores);
+    } else {
+        // Headers
+        DisplayObject rankHeader(startX, startY + yOffset, 5, 1, ObjectType::TEXT, Color(200, 200, 200), "Rank");
+        DisplayObject nameHeader(startX + 6, startY + yOffset, 10, 1, ObjectType::TEXT, Color(200, 200, 200), "Player");
+        DisplayObject scoreHeader(startX + 20, startY + yOffset, 10, 1, ObjectType::TEXT, Color(200, 200, 200), "Score");
+        
+        scoreObjects.push_back(rankHeader);
+        scoreObjects.push_back(nameHeader);
+        scoreObjects.push_back(scoreHeader);
+        
+        // Display up to 5 scores
+        int limit = std::min(5, static_cast<int>(formattedScores.size()));
+        for (int i = 0; i < limit; i++) {
+            yOffset += 1;
+            
+            // Rank number
+            std::string rankStr = std::to_string(i + 1) + ".";
+            DisplayObject rank(startX, startY + yOffset, rankStr.length(), 1, ObjectType::TEXT, Color(255, 255, 255), rankStr);
+            
+            // Player name (truncate if necessary)
+            std::string playerNameStr = formattedScores[i].first;
+            if (playerNameStr.length() > 12) {
+                playerNameStr = playerNameStr.substr(0, 9) + "...";
+            }
+            DisplayObject name(startX + 6, startY + yOffset, playerNameStr.length(), 1, ObjectType::TEXT, Color(255, 255, 255), playerNameStr);
+            
+            // Score
+            std::string scoreStr = std::to_string(formattedScores[i].second);
+            DisplayObject score(startX + 20, startY + yOffset, scoreStr.length(), 1, ObjectType::TEXT, Color(255, 255, 255), scoreStr);
+            
+            scoreObjects.push_back(rank);
+            scoreObjects.push_back(name);
+            scoreObjects.push_back(score);
+        }
+    }
+    
+    return scoreObjects;
 }
 
 const std::vector<DisplayObject> MenuManager::getPauseMenuDisplayData() const

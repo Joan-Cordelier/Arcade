@@ -44,4 +44,6 @@ class Core {
 
         IDisplay* display;
         IGame* game;
+
+        void saveCurrentScore();
 };

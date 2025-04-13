@@ -16,6 +16,7 @@
 enum MenuSection {
     GAMES,
     GRAPHICS,
+    SCORES,  // Added scores section
     NAME_INPUT
 };
 
@@ -49,6 +50,7 @@ class MenuManager {
         void update(Event event);
         const std::vector<DisplayObject> getDisplayData() const;
         const std::vector<DisplayObject> getPauseMenuDisplayData() const;
+        std::vector<DisplayObject> getScoreDisplay(int startX, int startY) const;
 
         // Menu selection info
         MenuSection getCurrentSection() const { return currentSection; }

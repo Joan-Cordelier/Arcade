@@ -23,6 +23,9 @@ ScoreManager::~ScoreManager()
 
 void ScoreManager::addScore(const std::string& playerName, const std::string& gameName, int score)
 {
+    if (playerName.empty() || gameName.empty())
+        return;
+        
     if (scores[gameName][playerName] < score) {
         scores[gameName][playerName] = score;
         saveScores();
@@ -52,7 +55,10 @@ void ScoreManager::saveScores()
     
     for (const auto& [gameName, players] : scores) {
         for (const auto& [playerName, score] : players) {
-            file << gameName << "," << playerName << "," << score << "\n";
+            // Only write valid entries
+            if (!gameName.empty() && !playerName.empty() && score > 0) {
+                file << gameName << "," << playerName << "," << score << "\n";
+            }
         }
     }
     
@@ -125,16 +131,15 @@ std::vector<std::pair<std::string, int>> ScoreManager::getFormattedScores(const 
     
     auto gameScores = getGameScores(gameName);
     
-    // Convert map to vector for sorting
     for (const auto& [player, score] : gameScores) {
-        formattedScores.emplace_back(player, score);
+        if (!player.empty() && score > 0) {
+            formattedScores.emplace_back(player, score);
+        }
     }
     
     std::sort(formattedScores.begin(), formattedScores.end(), 
               [](const auto& a, const auto& b) { return a.second > b.second; });
     
-    // Top 5 scores
-    // TODO: change to what we want
     if (formattedScores.size() > 5) {
         formattedScores.resize(5);
     }
