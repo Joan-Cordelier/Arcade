@@ -1,0 +1,24 @@
+Synthèse du projet Arcade :
+
+Objectifs obligatoires remplis :
+✔️ Chargement dynamique des .so graphiques et jeux
+✔️ Moteur centralisé (Core) indépendant des bibliothèques
+✔️ Menu interactif
+✔️ 2 jeux fonctionnels : Snake et Démineur
+✔️ 3 bibliothèques graphiques : ncurses, SDL2, SFML
+✔️ Affichage du score, collision, input clavier respecté
+✔️ Compilation unique avec Makefile
+
+Points techniques validés :
+- Usage de DisplayObject homogène (avec scale)
+- Détection de collision / bordure dans Snake
+- Reveal + cascade dans Démineur
+- Curseur de navigation (flèches + espace + F)
+- Génération de la map et des bombes au premier clic
+
+Recommandations :
+- Ajouter une animation ou transition pour améliorer le visuel
+- Intégrer un score final affiché dans Démineur
+- Nettoyer les logs de debug éventuels
+
+Projet valide au regard du sujet fourni.
