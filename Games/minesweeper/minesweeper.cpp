@@ -1,9 +1,9 @@
-#include "demineur.hpp"
+#include "minesweeper.hpp"
 #include <random>
 #include <iostream>
 #include <ctime>
 
-Demineur::Demineur() {
+minesweeper::minesweeper() {
     std::srand(std::time(nullptr));
     _inMenu = true;
     _selectedDifficulty = 0;
@@ -12,7 +12,7 @@ Demineur::Demineur() {
     _won = false;
 }
 
-void Demineur::reset() {
+void minesweeper::reset() {
     _inMenu = true;
     _selectedDifficulty = 0;
     _cursor = {0, 0};
@@ -21,7 +21,7 @@ void Demineur::reset() {
     _board.clear();
 }
 
-void Demineur::update(Event event) {
+void minesweeper::update(Event event) {
     if (_gameOver || _won)
         return;
 
@@ -39,7 +39,7 @@ void Demineur::update(Event event) {
     }
 }
 
-void Demineur::initGame(int bombs) {
+void minesweeper::initGame(int bombs) {
     _inMenu = false;
     _bombCount = bombs;
     _cursor = {0, 0};
@@ -87,7 +87,7 @@ void Demineur::initGame(int bombs) {
     }
 }
 
-void Demineur::handleInput(Event event) {
+void minesweeper::handleInput(Event event) {
     if (event.type != EventType::KEY_PRESSED && event.type != EventType::MOUSE_PRESSED)
         return;
 
@@ -118,7 +118,7 @@ void Demineur::handleInput(Event event) {
     }
 }
 
-void Demineur::reveal(int x, int y) {
+void minesweeper::reveal(int x, int y) {
     int idx = y * _width + x;
     if (_board[idx].isRevealed || _board[idx].isFlagged)
         return;
@@ -149,7 +149,7 @@ void Demineur::reveal(int x, int y) {
         _won = true;
 }
 
-const std::vector<DisplayObject> Demineur::getDisplayData() const {
+const std::vector<DisplayObject> minesweeper::getDisplayData() const {
     std::vector<DisplayObject> data;
 
     if (_inMenu) {
@@ -217,14 +217,14 @@ const std::vector<DisplayObject> Demineur::getDisplayData() const {
     return data;
 }
 
-int Demineur::getScore() const {
+int minesweeper::getScore() const {
     return _won ? 100 : _score;
 }
 
-void Demineur::stop()
+void minesweeper::stop()
 {}
 
 extern "C" IGame *createGame()
 {
-    return new Demineur();
+    return new minesweeper();
 }

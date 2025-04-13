@@ -7,10 +7,10 @@
 #include <string>
 #include <utility>
 
-class Demineur : public IGame {
+class minesweeper : public IGame {
 public:
-    Demineur();
-    ~Demineur() override = default;
+    minesweeper();
+    ~minesweeper() override = default;
 
     void reset() override;
     void update(Event event) override;

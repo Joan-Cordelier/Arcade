@@ -27,7 +27,7 @@ DISPLAY_TARGETS = $(addprefix $(LIB_DIR)/arcade_, \
 	$(addsuffix .so, $(DISPLAY_LIBS)))
 
 # Game libraries
-GAME_LIBS = snake demineur
+GAME_LIBS = snake minesweeper
 GAME_TARGETS = $(addprefix $(LIB_DIR)/arcade_, $(addsuffix .so, $(GAME_LIBS)))
 
 # Define phony targets
@@ -82,9 +82,9 @@ $(LIB_DIR)/arcade_snake.so:
 	@g++ $(LIBFLAGS) -o $@ $(shell find Games/Snake \
 		-name "*.cpp" 2>/dev/null) -ldl
 
-$(LIB_DIR)/arcade_demineur.so:
-	@echo "Building Demineur library: $@"
-	@g++ $(LIBFLAGS) -o $@ $(shell find Games/demineur \
+$(LIB_DIR)/arcade_minesweeper.so:
+	@echo "Building minesweeper library: $@"
+	@g++ $(LIBFLAGS) -o $@ $(shell find Games/minesweeper \
 		-name "*.cpp" 2>/dev/null) -ldl
 
 # Object files compilation
